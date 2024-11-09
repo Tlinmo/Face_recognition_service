@@ -4,10 +4,10 @@ import requests
 import json
 
 # Инициализация приложения для анализа лиц InsightFace
-app = FaceAnalysis(name="buffalo_l", providers=['CUDAExecutionProvider'])
+app = FaceAnalysis(name="buffalo_l", providers=['CPUExecutionProvider'])
 app.prepare(ctx_id=0, det_size=(256,256))
 
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(2)
 if not cap.isOpened():
     print("Ошибка доступа к веб-камере")
     exit(-1)
@@ -17,16 +17,16 @@ face_locations = []
 face_encodings = []
 face_names = []
 faces = []
-process_this_frame = 3
+process_this_frame = 7
 
-resize_coef = 0.25
+resize_coef = 1
 
 while True:
     # Grab a single frame of video
     ret, frame = cap.read()
 
     # Only process every other frame of video to save time
-    if process_this_frame == 3:
+    if process_this_frame == 7:
         face_locations = []
         face_encodings = []
         # Resize frame of video to 1/4 size for faster face recognition processing
@@ -91,7 +91,7 @@ while True:
         data = json.dumps({
             "username": username,
             "password": password,
-            "embeddings": [face_encodings[index].tolist()]
+            "embedding": [face_encodings[index].tolist()]
         })
         response = requests.post('http://localhost:8000/api/auth/create', data=data, headers=headers)
         if response.status_code == 201:
@@ -105,13 +105,13 @@ while True:
 
                     data = json.dumps({
                         "username": username,
-                        "embeddings": [face_encodings[index].tolist()]
+                        "embedding": [face_encodings[index].tolist()]
                     })
                     response = requests.put(f'http://localhost:8000/api/users/{id}', data=data, headers=headers)
                     if response.status_code == 204:
-                        print(f'Embeddings was successfully added to database')
+                        print(f'Embedding was successfully added to database')
                     else:
-                        print(f'Embeddings was not added to database')
+                        print(f'Embedding was not added to database')
                         print(str(response.text))
                         
                     break

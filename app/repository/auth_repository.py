@@ -5,12 +5,12 @@ import uuid
 from loguru import logger
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, or_
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
 from app.log import configure_logging
 from app.services.users.user import User
 from app.repository.models.users import User as db_User
-from app.repository.exceptions import UsernameError, UpdateError
+from app.repository.exceptions import UsernameError, UpdateError, DataBaseError
 
 configure_logging()
 
@@ -127,6 +127,12 @@ class UserRepository(IUserRepository):
         except IntegrityError as error:
             logger.error(error)
             raise UsernameError("Username уже занят")
+        except SQLAlchemyError as error:
+            error_type = type(error)
+            logger.error(f" {error_type} | {error}")
+            await self.session.rollback()
+            raise DataBaseError()
+
         except Exception as error:
             logger.error(error)
             await self.session.rollback()

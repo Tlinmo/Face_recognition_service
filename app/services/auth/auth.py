@@ -1,9 +1,9 @@
 from loguru import logger
-from app.repository.exceptions import UsernameError
+from app.repository.exceptions import UsernameError, DataBaseError
 
 from app.repository.auth_repository import IUserRepository
 from app.services.users.user import User
-from app.services.auth.exceptions import AuthUsernameError, AuthPasswordError
+from app.services.exceptions import AuthUsernameError, AuthPasswordError, ServiceDataBaseError
 from app.log import configure_logging
 
 configure_logging()
@@ -28,6 +28,9 @@ class AuthService:
         except UsernameError as error:
             logger.debug(error)
             raise AuthUsernameError()
+        except DataBaseError as error:
+            logger.debug(error)
+            raise ServiceDataBaseError()
 
     async def authentication(self, username: str, password: str) -> str:
         _user = await self.user_repository.get(username=username)

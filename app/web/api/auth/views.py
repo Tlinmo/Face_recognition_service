@@ -11,7 +11,7 @@ from app.repository.dependencies import get_db_session
 from app.repository.auth_repository import UserRepository
 from app.services.auth.auth import AuthService
 from app.services.users.user import User
-from app.services.auth.exceptions import AuthUsernameError, AuthPasswordError
+from app.services.exceptions import AuthUsernameError, AuthPasswordError, ServiceDataBaseError
 from app.web.api.auth import schema
 
 configure_logging()
@@ -39,6 +39,8 @@ async def register(
         return token
     except AuthUsernameError:
         raise HTTPException(status_code=409, detail="Такой пользователь уже есть")
+    except ServiceDataBaseError:
+        raise HTTPException(status_code=503, detail="База данных недоступна")
 
 
 @router.post("/login", status_code=200)
@@ -58,3 +60,5 @@ async def authentication(
         raise HTTPException(status_code=401, detail="Пароль не верный")
     except AuthUsernameError:
         raise HTTPException(status_code=401, detail="Логин не верный")
+    except ServiceDataBaseError:
+        raise HTTPException(status_code=503, detail="База данных недоступна")

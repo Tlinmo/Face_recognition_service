@@ -6,7 +6,7 @@ from loguru import logger
 from app.repository.auth_repository import IUserRepository
 from app.services.users.user import User
 from app.repository.exceptions import UpdateError
-from app.services.users.exceptions import UserUpdateError
+from app.services.exceptions import UserUpdateError
 from app.log import configure_logging
 
 configure_logging()

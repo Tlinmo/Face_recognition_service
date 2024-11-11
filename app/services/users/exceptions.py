@@ -1,2 +1,0 @@
-class UserUpdateError(Exception):
-    pass

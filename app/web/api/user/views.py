@@ -62,7 +62,7 @@ async def update(
     repo = UserRepository(session=session)
     user_service = UserService(user_repository=repo)
 
-    user = User(id=id_, username=_user.username, embedding=_user.embedding)
+    user = User(id=id_, username=_user.username, embeddings=_user.embeddings)
     
     try:
         await user_service.update(user)

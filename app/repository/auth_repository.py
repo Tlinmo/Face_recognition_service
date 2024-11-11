@@ -55,7 +55,7 @@ class UserRepository(IUserRepository):
             hashed_password=user.hashed_password,
             is_superuser=user.is_superuser,
         )
-        db_user.set_embedding(user.embedding)
+        db_user.set_embeddings(user.embeddings)
 
         self.session.add(db_user)
         await self.save()
@@ -86,14 +86,14 @@ class UserRepository(IUserRepository):
         user = user.scalars().one_or_none()
 
         if user:
-            return User(**user.dict(), embedding=user.get_embedding())
+            return User(**user.dict(), embeddings=user.get_embeddings())
         
     async def list(self, offset: int, limit: int = 10) -> List[User]:
         sql = select(db_User).offset(offset).limit(limit)
         users = await self.session.execute(sql)
         users = users.scalars().all()
 
-        return [User(**user.dict(), embedding=user.get_embedding()) for user in users]
+        return [User(**user.dict(), embeddings=user.get_embeddings()) for user in users]
 
 
     async def update(self, user: User):
@@ -111,11 +111,11 @@ class UserRepository(IUserRepository):
             )
             _user.username = user.username
 
-        if user.embedding:
+        if user.embeddings:
             logger.debug(
-                f"Изменяем embedding пользователя {_user.embedding} на {user.embedding}"
+                f"Изменяем embeddings пользователя {_user.embeddings} на {user.embeddings}"
             )
-            _user.set_embedding(user.embedding)
+            _user.set_embeddings(user.embeddings)
 
         self.session.add(_user)
         await self.save()

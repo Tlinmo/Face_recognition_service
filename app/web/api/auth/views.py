@@ -32,7 +32,7 @@ async def register(
     user = User(
         username=_user.username,
         hashed_password=User.hash_password(_user.password),
-        embedding=_user.embedding,
+        embeddings=_user.embeddings,
     )
     try:
         token = await auth.register(user)

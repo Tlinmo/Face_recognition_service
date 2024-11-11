@@ -39,7 +39,7 @@ class User(Base):
     username = Column(String, unique=True, index=True)
     hashed_password = Column(String, index=True)
     is_superuser = Column(Boolean, default=False)
-    embedding = Column(Text)
+    embeddings = Column(Text)
 
     def dict(self):
         return {
@@ -47,24 +47,24 @@ class User(Base):
             "username": self.username,
             "hashed_password": self.hashed_password,
             "is_superuser": self.is_superuser,
-            # "embedding": self.embedding, # верни когда перейдешь на postgresql
+            # "embeddings": self.embeddings, # верни когда перейдешь на postgresql
         }
 
-    def set_embedding(self, values):
+    def set_embeddings(self, values):
         """Сериализация массива в строку JSON."""
-        logger.debug("Сериализация embedding в строку")
-        self.embedding = json.dumps(values)
+        logger.debug("Сериализация embeddings в строку")
+        self.embeddings = json.dumps(values)
         logger.debug(
-            f"self.embedding: {self.embedding}, json.dumps(values): {json.dumps(values)}"
+            f"self.embeddings: {self.embeddings}, json.dumps(values): {json.dumps(values)}"
         )
 
-    def get_embedding(self) -> list:
+    def get_embeddings(self) -> list:
         """Десериализация строки JSON в массив."""
-        if self.embedding:
+        if self.embeddings:
             logger.debug("Десериализация строки JSON в массив")
             logger.debug(
-                f"self.embedding: {self.embedding}, json.loads(self.embedding): {json.loads(self.embedding)}"
+                f"self.embeddings: {self.embeddings}, json.loads(self.embeddings): {json.loads(self.embeddings)}"
             )
-            return json.loads(self.embedding)
+            return json.loads(self.embeddings)
 
         return []

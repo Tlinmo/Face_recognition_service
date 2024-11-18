@@ -60,8 +60,16 @@ class UserRepository(IUserRepository):
         )
 
         # Добавяет embedding
-        for embedding in user.embeddings:
-            db_user.embeddings.append(Embedding(vector=embedding))
+        # Нужно добавить больше обрботчиков, тут целая кладязь мин, каждую строчку можно обарачивать нах*й
+        if user.embeddings:
+            for embedding in user.embeddings:
+                # Ну, мало ли кто захочет пустой список в списке отправить?
+                if embedding:
+                    db_user.embeddings.append(Embedding(vector=embedding))
+                else:
+                    db_user.embeddings = []
+        else:
+            db_user.embeddings = []
 
         self.session.add(db_user)
         await self.save()

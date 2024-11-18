@@ -12,7 +12,7 @@ class User:
         hashed_password: str | None = None,
         id: uuid.UUID | None = None,
         is_superuser: bool = False,
-        embeddings: List[List[float]] = [[]],
+        embeddings: List[List[float]] = [],
     ) -> None:
         self.id = id
         self.username = username

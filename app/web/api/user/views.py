@@ -54,7 +54,6 @@ async def user_info(id_: UUID, session: AsyncSession = Depends(get_db_session)) 
         raise HTTPException(status_code=503, detail="База данных недоступна")
 
 
-
 @router.put("/{id_:str}", status_code=204)
 async def update(
     id_: UUID, _user: schema.UpdateUser, session: AsyncSession = Depends(get_db_session)
@@ -66,10 +65,10 @@ async def update(
     user_service = UserService(user_repository=repo)
 
     user = User(id=id_, username=_user.username, embeddings=_user.embeddings)
-    
+
     try:
         await user_service.update(user)
     except UserUpdateError:
-            raise HTTPException(status_code=404, detail="Не найдено")
+        raise HTTPException(status_code=404, detail="Не найдено")
     except ServiceDataBaseError:
         raise HTTPException(status_code=503, detail="База данных недоступна")

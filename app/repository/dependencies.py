@@ -30,4 +30,3 @@ async def get_db_session(request: Request) -> AsyncGenerator[AsyncSession, None]
     finally:
         logger.debug("Сессия базы данных закрывается")
         await session.close()
-

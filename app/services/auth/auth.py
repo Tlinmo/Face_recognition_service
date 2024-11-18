@@ -3,7 +3,11 @@ from app.repository.exceptions import UsernameError, DataBaseError
 
 from app.repository.auth_repository import IUserRepository
 from app.services.users.user import User
-from app.services.exceptions import AuthUsernameError, AuthPasswordError, ServiceDataBaseError
+from app.services.exceptions import (
+    AuthUsernameError,
+    AuthPasswordError,
+    ServiceDataBaseError,
+)
 from app.log import configure_logging
 
 configure_logging()

@@ -9,7 +9,13 @@ services:
       - .env
     environment:
       APP_HOST: 0.0.0.0
-      APP_DB_FILE: /db_data/db.sqlite3
+
+      # database settings
+      APP_DB_HOST: "localhost"
+      APP_DB_PORT: "5432"
+      APP_DB_BASE: "postgres"
+      APP_DB_USER: "postgres"
+      APP_DB_PASS: "password"
     volumes:
       - app-db-data:/db_data/
 
@@ -18,7 +24,12 @@ services:
     restart: "no"
     command: alembic upgrade head
     environment:
-      APP_DB_FILE: /db_data/db.sqlite3
+      # database settings
+      APP_DB_HOST: "localhost"
+      APP_DB_PORT: "5432"
+      APP_DB_BASE: "postgres"
+      APP_DB_USER: "postgres"
+      APP_DB_PASS: "password"
     volumes:
       - app-db-data:/db_data/
 

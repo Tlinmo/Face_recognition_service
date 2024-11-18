@@ -4,12 +4,14 @@ import uuid
 
 from loguru import logger
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, or_
+from sqlalchemy import delete, select, or_
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+from sqlalchemy.orm import selectinload
 
 from app.log import configure_logging
 from app.services.users.user import User
 from app.repository.models.users import User as db_User
+from app.repository.models.users import Embedding
 from app.repository.exceptions import UsernameError, UpdateError, DataBaseError
 
 configure_logging()
@@ -45,6 +47,7 @@ class IUserRepository(ABC):
     async def save(self):
         pass
 
+
 class UserRepository(IUserRepository):
     def __init__(self, session: AsyncSession) -> None:
         super().__init__(session)
@@ -55,13 +58,15 @@ class UserRepository(IUserRepository):
             hashed_password=user.hashed_password,
             is_superuser=user.is_superuser,
         )
-        db_user.set_embeddings(user.embeddings)
+
+        # Добавяет embedding
+        for embedding in user.embeddings:
+            db_user.embeddings.append(Embedding(vector=embedding))
 
         self.session.add(db_user)
         await self.save()
         _user = User(**db_user.dict())
         return _user
-
 
     async def get(
         self,
@@ -72,7 +77,7 @@ class UserRepository(IUserRepository):
         if id_ is None and username is None:
             return None
 
-        sql = select(db_User)
+        sql = select(db_User).options(selectinload(db_User.embeddings))
 
         filters = []
         if id_:
@@ -86,19 +91,25 @@ class UserRepository(IUserRepository):
         user = user.scalars().one_or_none()
 
         if user:
-            return User(**user.dict(), embeddings=user.get_embeddings())
-        
+            return User(**user.dict())
+
     async def list(self, offset: int, limit: int = 10) -> List[User]:
-        sql = select(db_User).offset(offset).limit(limit)
+        sql = (
+            select(db_User)
+            .options(selectinload(db_User.embeddings))
+            .offset(offset)
+            .limit(limit)
+        )
         users = await self.session.execute(sql)
         users = users.scalars().all()
-
-        return [User(**user.dict(), embeddings=user.get_embeddings()) for user in users]
-
+        return [User(**user.dict()) for user in users]
 
     async def update(self, user: User):
-        # Юзаем sqlite, а он не может в UUID так что вот так вот
-        sql = select(db_User).where(db_User.id == str(user.id))
+        sql = (
+            select(db_User)
+            .options(selectinload(db_User.embeddings))
+            .where(db_User.id == user.id)
+        )
         _user = await self.session.execute(sql)
         _user = _user.scalars().one_or_none()
 
@@ -112,12 +123,21 @@ class UserRepository(IUserRepository):
             _user.username = user.username
 
         if user.embeddings:
-            logger.debug(
-                f"Изменяем embeddings пользователя {_user.embeddings} на {user.embeddings}"
-            )
-            _user.set_embeddings(user.embeddings)
+            logger.debug(f"Изменяем embeddings пользователя")
 
-        self.session.add(_user)
+            logger.debug("Удаляем embedding")
+            # _user.embeddings.clear()
+
+            await self.session.execute(
+                delete(Embedding).where(Embedding.user_id == user.id)
+            )
+            for embedding in user.embeddings:
+                if embedding:
+                    logger.debug("Обновляем embedding")
+                    db_embedding = Embedding(user_id=user.id, vector=embedding)
+                    self.session.add(db_embedding)
+
+        # self.session.add(_user)
         await self.save()
 
     async def save(self):

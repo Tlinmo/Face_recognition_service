@@ -2,6 +2,7 @@ import enum
 from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from yarl import URL
 
 APP_ROOT = Path(__file__).parent.parent
 
@@ -37,17 +38,28 @@ class Settings(BaseSettings):
 
     log_level: LogLevel = LogLevel.DEBUG
     # Variables for the database
-    db_file: str = "db.sqlite3"
+    db_host: str = "localhost"
+    db_port: int = 5432
+    db_user: str = "postgres"
+    db_pass: str = "password"
+    db_base: str = "postgres"
     db_echo: bool = False
 
     @property
-    def db_url(self) -> str:
+    def db_url(self) -> URL:
         """
         Assemble database URL from settings.
 
         :return: database URL.
         """
-        return f"sqlite+aiosqlite:///{self.db_file}"
+        return URL.build(
+            scheme="postgresql+asyncpg",
+            host=self.db_host,
+            port=self.db_port,
+            user=self.db_user,
+            password=self.db_pass,
+            path=f"/{self.db_base}",
+        )
 
     model_config = SettingsConfigDict(
         env_file=".env",

@@ -26,6 +26,8 @@ httptools = "^0.6.1"
 pymongo = "^4.8.0"
 loguru = "^0"
 bcrypt = "^4.2.0"
+asyncpg = "^0.30.0"
+pgvector = "^0.3.6"
 
 
 [tool.poetry.group.dev.dependencies]

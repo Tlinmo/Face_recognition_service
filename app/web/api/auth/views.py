@@ -11,7 +11,11 @@ from app.repository.dependencies import get_db_session
 from app.repository.auth_repository import UserRepository
 from app.services.auth.auth import AuthService
 from app.services.users.user import User
-from app.services.exceptions import AuthUsernameError, AuthPasswordError, ServiceDataBaseError
+from app.services.exceptions import (
+    AuthUsernameError,
+    AuthPasswordError,
+    ServiceDataBaseError,
+)
 from app.web.api.auth import schema
 
 configure_logging()
@@ -54,7 +58,9 @@ async def authentication(
     auth = AuthService(user_repository=repo)
 
     try:
-        token = await auth.authentication(username=_user.username, password=_user.password)
+        token = await auth.authentication(
+            username=_user.username, password=_user.password
+        )
         return token
     except AuthPasswordError:
         raise HTTPException(status_code=401, detail="Пароль не верный")

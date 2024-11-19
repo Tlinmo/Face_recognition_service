@@ -88,10 +88,6 @@ async def face_authentication(
         user = await auth.face_authentication(embedding=_user.embedding)
         return user.username
     except AuthFaceError:
-        raise HTTPException(status_code=401, detail="Пароль не верный")
-    except AuthPasswordError:
-        raise HTTPException(status_code=401, detail="Пароль не верный")
-    except AuthUsernameError:
-        raise HTTPException(status_code=401, detail="Логин не верный")
+        raise HTTPException(status_code=401, detail="Лицо не найдено в базе данных")
     except ServiceDataBaseError:
         raise HTTPException(status_code=503, detail="База данных недоступна")

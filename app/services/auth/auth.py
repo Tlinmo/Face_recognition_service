@@ -17,7 +17,9 @@ configure_logging()
 
 
 class AuthService:
-    def __init__(self, user_repository: UserRepository, embedding_repository: EmbeddingRepository) -> None:
+    def __init__(
+        self, user_repository: UserRepository, embedding_repository: EmbeddingRepository
+    ) -> None:
         self.user_repository = user_repository
         self.embedding_repository = embedding_repository
 
@@ -47,14 +49,14 @@ class AuthService:
                 return "тут типа токен? а зач?"
             raise AuthPasswordError()
         raise AuthUsernameError()
-    
+
     async def face_authentication(self, embedding: List[float]) -> User | str:
         _embedding = await self.embedding_repository.get(vector=embedding)
         if not _embedding:
             raise AuthFaceError
-        
+
         user = await self.user_repository.get(_embedding.user_id)
-        
+
         if not user:
             return "Кто ты, воин?"
         return user

@@ -35,7 +35,7 @@ class User(Base):
             "embeddings": [embedding.vector for embedding in self.embeddings],
         }
 
-    def set_embeddings(self, embeddings:List[List[float]]):
+    def set_embeddings(self, embeddings: List[List[float]]):
         if embeddings:
             for embedding in embeddings:
                 # Ну, мало ли кто захочет пустой список в списке отправить?
@@ -45,6 +45,7 @@ class User(Base):
                     self.embeddings = []
         else:
             self.embeddings = []
+
 
 class Embedding(Base):
     __tablename__ = "embeddings"

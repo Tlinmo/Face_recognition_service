@@ -71,7 +71,8 @@ async def authentication(
         raise HTTPException(status_code=401, detail="Логин не верный")
     except ServiceDataBaseError:
         raise HTTPException(status_code=503, detail="База данных недоступна")
-    
+
+
 @router.post("/face", status_code=200)
 async def face_authentication(
     _user: schema.AuthFaceUser, session: AsyncSession = Depends(get_db_session)

@@ -6,7 +6,7 @@ class Embedding:
     def __init__(
         self,
         vector: List[float] | None = None,
-        user_id:uuid.UUID | None = None,
+        user_id: uuid.UUID | None = None,
         id: uuid.UUID | None = None,
     ) -> None:
         self.id = id

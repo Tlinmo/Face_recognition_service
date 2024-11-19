@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import delete, func, select, or_
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import selectinload
-from pgvector.sqlalchemy.functions import avg 
+from pgvector.sqlalchemy.functions import avg
 
 from app.log import configure_logging
 from app.services.users.user import User
@@ -19,7 +19,8 @@ from app.repository.exceptions import UsernameError, UpdateError, DataBaseError
 configure_logging()
 
 
-T = TypeVar('T')
+T = TypeVar("T")
+
 
 class IRepository(Generic[T], ABC):
     def __init__(self, session: AsyncSession) -> None:
@@ -57,7 +58,6 @@ class IRepository(Generic[T], ABC):
         except Exception as error:
             logger.error(error)
             await self.session.rollback()
-
 
 
 class UserRepository(IRepository):
@@ -129,9 +129,7 @@ class UserRepository(IRepository):
             _user.username = entity.username
 
         if entity.embeddings:
-            logger.debug(
-                f"Изменяем embeddings пользователя"
-            )
+            logger.debug(f"Изменяем embeddings пользователя")
 
             await self.session.execute(
                 delete(db_Embedding).where(db_Embedding.user_id == entity.id)
@@ -150,7 +148,7 @@ class EmbeddingRepository(IRepository):
 
         self.session.add(db_embedding)
         await self.save()
-        
+
         _embedding = Embedding(**db_embedding.dict())
         return _embedding
 
@@ -160,8 +158,8 @@ class EmbeddingRepository(IRepository):
         vector: List[float] = [],
     ) -> Embedding | None:
         embedding = None
-        
-        if not id_  and not vector:
+
+        if not id_ and not vector:
             return None
 
         if id_:
@@ -175,7 +173,9 @@ class EmbeddingRepository(IRepository):
         if vector:
             sql = (
                 select(db_Embedding)
-                .where((db_Embedding.vector.l2_distance(vector)) < 0.90)  # Порог схожести
+                .where(
+                    (db_Embedding.vector.l2_distance(vector)) < 0.90
+                )  # Порог схожести
                 .order_by(db_Embedding.vector.l2_distance(vector))
                 .limit(1)
             )
@@ -212,5 +212,3 @@ class EmbeddingRepository(IRepository):
             _embedding.vector = entity.vector
 
         await self.save()
-
-

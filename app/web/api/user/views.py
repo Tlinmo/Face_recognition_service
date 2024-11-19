@@ -19,7 +19,7 @@ configure_logging()
 router = APIRouter()
 
 
-@router.get("/", response_model=List[schema.User], status_code=200)
+@router.get("/", response_model=List[schema.Users], status_code=200)
 async def list_users(
     offset: int = 0, limit: int = 10, session: AsyncSession = Depends(get_db_session)
 ) -> List[User]:

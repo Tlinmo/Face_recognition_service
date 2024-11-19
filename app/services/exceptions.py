@@ -10,6 +10,10 @@ class AuthPasswordError(UserError):
     pass
 
 
+class AuthFaceError(UserError):
+    pass
+
+
 class UserUpdateError(UserError):
     pass
 

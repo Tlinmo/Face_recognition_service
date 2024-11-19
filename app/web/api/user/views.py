@@ -8,7 +8,7 @@ from loguru import logger
 
 from app.log import configure_logging
 from app.repository.dependencies import get_db_session
-from app.repository.auth_repository import UserRepository
+from app.repository.repository import UserRepository
 from app.services.users.users import UserService
 from app.services.exceptions import UserUpdateError, ServiceDataBaseError
 from app.services.users.user import User

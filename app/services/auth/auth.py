@@ -1,9 +1,12 @@
+from typing import List
+
 from loguru import logger
 from app.repository.exceptions import UsernameError, DataBaseError
 
-from app.repository.auth_repository import IUserRepository
+from app.repository.repository import UserRepository, EmbeddingRepository
 from app.services.users.user import User
 from app.services.exceptions import (
+    AuthFaceError,
     AuthUsernameError,
     AuthPasswordError,
     ServiceDataBaseError,
@@ -14,12 +17,13 @@ configure_logging()
 
 
 class AuthService:
-    def __init__(self, user_repository: IUserRepository) -> None:
+    def __init__(self, user_repository: UserRepository, embedding_repository: EmbeddingRepository) -> None:
         self.user_repository = user_repository
+        self.embedding_repository = embedding_repository
 
     async def register(self, user: User) -> str:
         try:
-            _user = await self.user_repository.add(user=user)
+            _user = await self.user_repository.add(entity=user)
             logger.debug(_user.__dict__)
 
             # Если id к этому моменту нет, сработает исключение на уровне репозитория
@@ -43,3 +47,14 @@ class AuthService:
                 return "тут типа токен? а зач?"
             raise AuthPasswordError()
         raise AuthUsernameError()
+    
+    async def face_authentication(self, embedding: List[float]) -> User | str:
+        _embedding = await self.embedding_repository.get(vector=embedding)
+        if not _embedding:
+            raise AuthFaceError
+        
+        user = await self.user_repository.get(_embedding.user_id)
+        
+        if not user:
+            return "Кто ты, воин?"
+        return user

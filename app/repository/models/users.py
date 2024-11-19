@@ -1,3 +1,4 @@
+from typing import List
 import uuid
 
 from sqlalchemy import Boolean, Column, String, ForeignKey, UUID
@@ -34,6 +35,16 @@ class User(Base):
             "embeddings": [embedding.vector for embedding in self.embeddings],
         }
 
+    def set_embeddings(self, embeddings:List[List[float]]):
+        if embeddings:
+            for embedding in embeddings:
+                # Ну, мало ли кто захочет пустой список в списке отправить?
+                if embedding:
+                    self.embeddings.append(Embedding(vector=embedding))
+                else:
+                    self.embeddings = []
+        else:
+            self.embeddings = []
 
 class Embedding(Base):
     __tablename__ = "embeddings"
@@ -42,3 +53,10 @@ class Embedding(Base):
     user_id = Column(UUID, ForeignKey("users.id"), nullable=False)
     vector = Column(Vector(512), nullable=False)
     user = relationship("User", back_populates="embeddings")
+
+    def dict(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "vector": self.vector,
+        }

@@ -13,4 +13,6 @@ class UserCreate(BaseModel):
 class AuthUser(BaseModel):
     username: str
     password: str
-    embeddings: Optional[List[List[float]]]
+
+class AuthFaceUser(BaseModel):
+    embedding: Optional[List[float]]

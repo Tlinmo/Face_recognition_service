@@ -3,7 +3,7 @@ from uuid import UUID
 
 from loguru import logger
 
-from app.repository.auth_repository import IUserRepository
+from app.repository.repository import UserRepository
 from app.services.users.user import User
 from app.repository.exceptions import UpdateError
 from app.services.exceptions import UserUpdateError
@@ -13,7 +13,7 @@ configure_logging()
 
 
 class UserService:
-    def __init__(self, user_repository: IUserRepository) -> None:
+    def __init__(self, user_repository: UserRepository) -> None:
         self.user_repository = user_repository
 
     async def lst(self, offset: int, limit: int) -> List[User]:
@@ -27,6 +27,6 @@ class UserService:
 
     async def update(self, user: User):
         try:
-            await self.user_repository.update(user=user)
+            await self.user_repository.update(entity=user)
         except UpdateError:
             raise UserUpdateError()

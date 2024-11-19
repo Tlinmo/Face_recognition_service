@@ -8,12 +8,13 @@ from loguru import logger
 
 from app.log import configure_logging
 from app.repository.dependencies import get_db_session
-from app.repository.auth_repository import UserRepository
+from app.repository.repository import EmbeddingRepository, UserRepository
 from app.services.auth.auth import AuthService
 from app.services.users.user import User
 from app.services.exceptions import (
     AuthUsernameError,
     AuthPasswordError,
+    AuthFaceError,
     ServiceDataBaseError,
 )
 from app.web.api.auth import schema
@@ -31,8 +32,9 @@ async def register(
 
     logger.debug("Создание пользователя")
 
-    repo = UserRepository(session=session)
-    auth = AuthService(user_repository=repo)
+    user_repo = UserRepository(session=session)
+    embedding_repo = EmbeddingRepository(session=session)
+    auth = AuthService(user_repository=user_repo, embedding_repository=embedding_repo)
     user = User(
         username=_user.username,
         hashed_password=User.hash_password(_user.password),
@@ -54,14 +56,38 @@ async def authentication(
     """Авторизация пользователя"""
     logger.debug("Авторизация пользователя")
 
-    repo = UserRepository(session=session)
-    auth = AuthService(user_repository=repo)
+    user_repo = UserRepository(session=session)
+    embedding_repo = EmbeddingRepository(session=session)
+    auth = AuthService(user_repository=user_repo, embedding_repository=embedding_repo)
 
     try:
         token = await auth.authentication(
             username=_user.username, password=_user.password
         )
         return token
+    except AuthPasswordError:
+        raise HTTPException(status_code=401, detail="Пароль не верный")
+    except AuthUsernameError:
+        raise HTTPException(status_code=401, detail="Логин не верный")
+    except ServiceDataBaseError:
+        raise HTTPException(status_code=503, detail="База данных недоступна")
+    
+@router.post("/face", status_code=200)
+async def face_authentication(
+    _user: schema.AuthFaceUser, session: AsyncSession = Depends(get_db_session)
+) -> str:
+    """Аунтификация пользователя по лицу"""
+    logger.debug("Аунтификация пользователя по лицу")
+
+    user_repo = UserRepository(session=session)
+    embedding_repo = EmbeddingRepository(session=session)
+    auth = AuthService(user_repository=user_repo, embedding_repository=embedding_repo)
+
+    try:
+        user = await auth.face_authentication(embedding=_user.embedding)
+        return user.username
+    except AuthFaceError:
+        raise HTTPException(status_code=401, detail="Пароль не верный")
     except AuthPasswordError:
         raise HTTPException(status_code=401, detail="Пароль не верный")
     except AuthUsernameError:

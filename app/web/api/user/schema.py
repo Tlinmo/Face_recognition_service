@@ -20,3 +20,12 @@ class User(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class Users(BaseModel):
+    id: Optional[UUID]
+    username: str
+    is_superuser: bool
+
+    class Config:
+        from_attributes = True

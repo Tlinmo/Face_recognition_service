@@ -174,7 +174,7 @@ class EmbeddingRepository(IRepository):
             sql = (
                 select(db_Embedding)
                 .where(
-                    (db_Embedding.vector.l2_distance(vector)) < 0.90
+                    (db_Embedding.vector.l2_distance(vector)) < 1.2
                 )  # Порог схожести
                 .order_by(db_Embedding.vector.l2_distance(vector))
                 .limit(1)

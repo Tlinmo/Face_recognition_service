@@ -8,7 +8,7 @@ app = MyFaceAnalysis(name="buffalo_l", providers=['CUDAExecutionProvider'])
 app.prepare(ctx_id=0, det_size=(640,640))
 
 # Получаем доступ к камере
-cap = cv2.VideoCapture(2)
+cap = cv2.VideoCapture(0)
 if not cap.isOpened():
     print("Ошибка доступа к веб-камере")
     exit(-1)

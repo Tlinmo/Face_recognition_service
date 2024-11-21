@@ -1,8 +1,10 @@
 from typing import List
+import numpy as np
 
 from loguru import logger
-from app.repository.exceptions import UsernameError, DataBaseError
 
+from app.settings import settings 
+from app.repository.exceptions import UsernameError, DataBaseError
 from app.repository.repository import UserRepository, EmbeddingRepository
 from app.services.users.user import User
 from app.services.exceptions import (
@@ -50,13 +52,25 @@ class AuthService:
             raise AuthPasswordError()
         raise AuthUsernameError()
 
-    async def face_authentication(self, embedding: List[float]) -> User | str:
+    async def face_authentication(self, embedding: List[float]) -> User:
         _embedding = await self.embedding_repository.get(vector=embedding)
+        
         if not _embedding:
             raise AuthFaceError
 
         user = await self.user_repository.get(_embedding.user_id)
-
+        
         if not user:
-            return "Кто ты, воин?"
+            raise AuthFaceError
+        
+        # Узнаем схожесть с Embeddings пользователя
+        # Что лучше, использовать это, или __debug__? хм..
+        if settings.environment == "dev":
+            logger.debug(f"Узнается схожесть с embeddings пользователя")
+            for user_embedding in user.embeddings:
+                similarity = np.linalg.norm(np.array(user_embedding.vector) - np.array(embedding))
+                user_embedding.similarity = similarity
+                
+                logger.debug(f"Схожесть пользователя: {similarity}")
+        
         return user

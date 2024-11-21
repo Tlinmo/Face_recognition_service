@@ -73,10 +73,10 @@ async def authentication(
         raise HTTPException(status_code=503, detail="База данных недоступна")
 
 
-@router.post("/face", status_code=200)
+@router.post("/face", response_model=schema.FaceUser, status_code=200)
 async def face_authentication(
     _user: schema.AuthFaceUser, session: AsyncSession = Depends(get_db_session)
-) -> str:
+) -> User:
     """Аунтификация пользователя по лицу"""
     logger.debug("Аунтификация пользователя по лицу")
 
@@ -86,7 +86,12 @@ async def face_authentication(
 
     try:
         user = await auth.face_authentication(embedding=_user.embedding)
-        return user.username
+        for _embd in user.embeddings:
+            logger.debug(f"{_embd.similarity} TEST")
+            logger.debug(f"{_embd.similarity} TEST")
+            logger.debug(f"{_embd.similarity} TEST")
+            logger.debug(f"{_embd.similarity} TEST")
+        return user
     except AuthFaceError:
         raise HTTPException(status_code=401, detail="Лицо не найдено в базе данных")
     except ServiceDataBaseError:

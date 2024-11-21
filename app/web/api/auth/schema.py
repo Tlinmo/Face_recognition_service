@@ -17,3 +17,15 @@ class AuthUser(BaseModel):
 
 class AuthFaceUser(BaseModel):
     embedding: Optional[List[float]]
+    
+    
+class SimilarityEmbedding(BaseModel):
+    similarity: float
+    
+class FaceUser(BaseModel):
+    id: Optional[UUID]
+    username: str
+    embeddings: List[SimilarityEmbedding]
+
+    class Config:
+        from_attributes = True

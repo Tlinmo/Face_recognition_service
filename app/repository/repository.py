@@ -1,6 +1,7 @@
 from typing import List, TypeVar, Generic
 from abc import ABC, abstractmethod
 import uuid
+import numpy as np
 
 from loguru import logger
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -67,7 +68,8 @@ class UserRepository(IRepository):
             hashed_password=entity.hashed_password,
             is_superuser=entity.is_superuser,
         )
-        db_user.set_embeddings(entity.embeddings)
+        # Итс нот гуд да? блять..
+        db_user.set_embeddings([embd.vector for embd in entity.embeddings])
 
         self.session.add(db_user)
         await self.save()
@@ -134,7 +136,7 @@ class UserRepository(IRepository):
             await self.session.execute(
                 delete(db_Embedding).where(db_Embedding.user_id == entity.id)
             )
-            _user.set_embeddings(entity.embeddings)
+            _user.set_embeddings([embd.vector for embd in entity.embeddings])
 
         await self.save()
 
@@ -174,8 +176,8 @@ class EmbeddingRepository(IRepository):
             sql = (
                 select(db_Embedding)
                 .where(
-                    (db_Embedding.vector.l2_distance(vector)) < 1.2
-                )  # Порог схожести
+                    (db_Embedding.vector.l2_distance(vector)) < 1.2 # Порог схожести
+                )  
                 .order_by(db_Embedding.vector.l2_distance(vector))
                 .limit(1)
             )
@@ -184,7 +186,6 @@ class EmbeddingRepository(IRepository):
 
         if embedding:
             return Embedding(**embedding.dict())
-
     async def list(self, offset: int, limit: int = 10) -> List[Embedding]:
         sql = (
             select(db_Embedding)

@@ -86,11 +86,6 @@ async def face_authentication(
 
     try:
         user = await auth.face_authentication(embedding=_user.embedding)
-        for _embd in user.embeddings:
-            logger.debug(f"{_embd.similarity} TEST")
-            logger.debug(f"{_embd.similarity} TEST")
-            logger.debug(f"{_embd.similarity} TEST")
-            logger.debug(f"{_embd.similarity} TEST")
         return user
     except AuthFaceError:
         raise HTTPException(status_code=401, detail="Лицо не найдено в базе данных")

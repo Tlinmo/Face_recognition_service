@@ -1,48 +1,22 @@
 import face_recognition
 import cv2
+from PIL import Image, ImageDraw, ImageFont
 import numpy as np
+import requests
 
-# This is a demo of running face recognition on live video from your webcam. It's a little more complicated than the
-# other example, but it includes some basic performance tweaks to make things run a lot faster:
-#   1. Process each video frame at 1/4 resolution (though still display it at full resolution)
-#   2. Only detect faces in every other frame of video.
-
-# PLEASE NOTE: This example requires OpenCV (the `cv2` library) to be installed only to read from your webcam.
-# OpenCV is *not* required to use the face_recognition library. It's only required if you want to run this
-# specific demo. If you have trouble installing it, try any of the other demos that don't require it instead.
-
-# Get a reference to webcam #0 (the default one)
 video_capture = cv2.VideoCapture(2)
 
-# Load a sample picture and learn how to recognize it.
-obama_image = face_recognition.load_image_file("obama.jpg")
-obama_face_encoding = face_recognition.face_encodings(obama_image)[0]
+usernames = []
+embeddingss = []
+def get_users():
+    global usernames, embeddingss
+    users = requests.post('http://127.0.0.1:8000/api/list?offset=0&limit=100').json()
+    usernames = [item["username"] for item in users]
+    embeddingss = [np.array(item["embeddings"]) for item in users]
 
-# Load a second sample picture and learn how to recognize it.
-biden_image = face_recognition.load_image_file("biden.jpg")
-biden_face_encoding = face_recognition.face_encodings(biden_image)[0]
-
-# Load a second sample picture and learn how to recognize it.
-biden_image = face_recognition.load_image_file("yura.jpg")
-yura_face_encoding = face_recognition.face_encodings(biden_image)[0]
-
-# Create arrays of known face encodings and their names
-known_face_encodings = [
-    obama_face_encoding,
-    biden_face_encoding,
-    yura_face_encoding
-]
-known_face_names = [
-    "Barack Obama",
-    "Joe Biden",
-    "You"
-]
-
-# Initialize some variables
-face_locations = []
-face_encodings = []
-face_names = []
 process_this_frame = 0
+face_locations = []
+face_names = []
 
 resize_coef = 1
 
@@ -51,7 +25,8 @@ while True:
     ret, frame = video_capture.read()
 
     # Only process every other frame of video to save time
-    if process_this_frame == 7:
+    if process_this_frame == 14:
+        get_users()
         # Resize frame of video to 1/4 size for faster face recognition processing
         small_frame = cv2.resize(frame, (0, 0), fx=resize_coef, fy=resize_coef)
 
@@ -65,21 +40,15 @@ while True:
         face_names = []
         for face_encoding in face_encodings:
             # See if the face is a match for the known face(s)
-            matches = face_recognition.compare_faces(known_face_encodings, face_encoding, 0.4)
+            matches = face_recognition.compare_faces(embeddingss, face_encoding, 0.6)
             name = "Unknown"
 
-            # # If a match was found in known_face_encodings, just use the first one.
-            # if True in matches:
-            #     first_match_index = matches.index(True)
-            #     name = known_face_names[first_match_index]
-
-            # Or instead, use the known face with the smallest distance to the new face
-            face_distances = face_recognition.face_distance(known_face_encodings, face_encoding)
+            face_distances = face_recognition.face_distance(embeddingss, face_encoding)
             best_match_index = np.argmin(face_distances)
             if matches[best_match_index]:
-                name = known_face_names[best_match_index] + f' {face_distances[best_match_index]}'
+                name = usernames[best_match_index] + f' {int(100 - face_distances[best_match_index] * 100)}%'
             else:
-                name = f'Unknown {face_distances[best_match_index]}'
+                name = f'Unknown {int(100 - face_distances[best_match_index] * 100)}%'
 
             face_names.append(name)
 
@@ -100,8 +69,12 @@ while True:
 
         # Draw a label with a name below the face
         cv2.rectangle(frame, (left, bottom - 35), (right, bottom), (0, 0, 255), cv2.FILLED)
-        font = cv2.FONT_HERSHEY_DUPLEX
-        cv2.putText(frame, name, (left + 6, bottom - 6), font, 1.0, (255, 255, 255), 1)
+        font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 26)
+        image_pil = Image.fromarray(frame)
+        draw = ImageDraw.Draw(image_pil)
+        text_x, text_y = left + 6, bottom - 32
+        draw.text((text_x, text_y), name, font=font, fill=(255, 255, 255))
+        frame = np.array(image_pil)
 
     # Display the resulting image
     cv2.imshow('Video', frame)

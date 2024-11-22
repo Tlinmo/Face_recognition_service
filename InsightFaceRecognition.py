@@ -43,8 +43,15 @@ class MyFaceAnalysis(FaceAnalysis):
         index = np.argmin(dists)
         return dists[index], index
 
-    def draw_on(self, img, faces):
+    def draw_on(self, img, faces, det_time='', rec_time=''):
         dimg = img.copy()
+
+        font = ImageFont.truetype("Fonts/DejaVuSans.ttf", 26)
+        image_pil = Image.fromarray(dimg)
+        draw = ImageDraw.Draw(image_pil)
+        draw.text((0, 0), det_time + '\n' + rec_time, font=font, fill=(255, 255, 255))
+        dimg = np.array(image_pil)
+
         for _, face in enumerate(faces):
             box = face.bbox.astype(int)
 

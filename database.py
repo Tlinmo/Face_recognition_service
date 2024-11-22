@@ -40,7 +40,7 @@ def compare_face(embedding):
     })
     response = requests.post(f'{host}api/auth/face', data=data, headers=headers)
     if response.status_code == 200:
-        return response.text
+        return response.json()
     else:
         return None
 

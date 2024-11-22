@@ -27,9 +27,12 @@ class MyFaceAnalysis(FaceAnalysis):
     def recognize(self, img, faces):
         for _, face in enumerate(faces):
             face.img = face_align.norm_crop(img, landmark=face.kps, image_size=self.models['recognition'].input_size[0])
-            face.embedding = self.models['recognition'].get_feat(face.img).flatten()
+            face.embedding = self.get_embedding(face.img)
             face.embedding = face.embedding / np.linalg.norm(face.embedding)
             face.img = cv2.resize(face.img, (0, 0), fx=2, fy=2)
+
+    def get_embedding(self, img):
+        return self.models['recognition'].get_feat(img).flatten()
 
     @staticmethod
     def compare_euq(embs, emb2):

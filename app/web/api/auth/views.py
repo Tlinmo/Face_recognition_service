@@ -1,10 +1,8 @@
 import imghdr
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import APIRouter, Depends, HTTPException, File, UploadFile
+from fastapi import APIRouter, Depends, HTTPException
 from loguru import logger
-import numpy as np
-import cv2
 
 from app.log import configure_logging
 from app.repository.dependencies import get_db_session
@@ -93,25 +91,3 @@ async def embedding_face_authentication(
     except ServiceDataBaseError:
         raise HTTPException(status_code=503, detail="База данных недоступна")
     
-@router.post("/", response_model=schema.VectorEmbedding)
-async def image_face_authentication(file: UploadFile = File(...)):
-    """Аунтификация пользователя по image"""
-    
-    if not file.content_type or not file.content_type.startswith('image/'):
-        raise HTTPException(status_code=400, detail="Загруженный файл не является изображением.")
-
-    contents = await file.read()
-    
-    if imghdr.what(None, contents) is None:
-        raise HTTPException(status_code=400, detail="Загруженный файл не является изображением.")
-
-    nparr = np.frombuffer(contents, np.uint8)
-    image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-
-    if image is None:
-        raise HTTPException(status_code=400, detail="Не удалось декодировать изображение.")
-
-    embedding = reco.get_embedding(img=image)
-    
-    
-    return Embedding(vector=embedding.tolist())

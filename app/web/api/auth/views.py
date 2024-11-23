@@ -1,10 +1,10 @@
-from typing import List
-from uuid import UUID
+import imghdr
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, File, UploadFile
 from loguru import logger
-
+import numpy as np
+import cv2
 
 from app.log import configure_logging
 from app.repository.dependencies import get_db_session
@@ -18,6 +18,7 @@ from app.services.exceptions import (
     ServiceDataBaseError,
 )
 from app.web.api.auth import schema
+
 
 configure_logging()
 
@@ -74,10 +75,10 @@ async def authentication(
 
 
 @router.post("/face", response_model=schema.FaceUser, status_code=200)
-async def face_authentication(
+async def embedding_face_authentication(
     _user: schema.AuthFaceUser, session: AsyncSession = Depends(get_db_session)
 ) -> User:
-    """Аунтификация пользователя по лицу"""
+    """Аунтификация пользователя по embedding"""
     logger.debug("Аунтификация пользователя по лицу")
 
     user_repo = UserRepository(session=session)
@@ -91,3 +92,26 @@ async def face_authentication(
         raise HTTPException(status_code=401, detail="Лицо не найдено в базе данных")
     except ServiceDataBaseError:
         raise HTTPException(status_code=503, detail="База данных недоступна")
+    
+@router.post("/", response_model=schema.VectorEmbedding)
+async def image_face_authentication(file: UploadFile = File(...)):
+    """Аунтификация пользователя по image"""
+    
+    if not file.content_type or not file.content_type.startswith('image/'):
+        raise HTTPException(status_code=400, detail="Загруженный файл не является изображением.")
+
+    contents = await file.read()
+    
+    if imghdr.what(None, contents) is None:
+        raise HTTPException(status_code=400, detail="Загруженный файл не является изображением.")
+
+    nparr = np.frombuffer(contents, np.uint8)
+    image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+
+    if image is None:
+        raise HTTPException(status_code=400, detail="Не удалось декодировать изображение.")
+
+    embedding = reco.get_embedding(img=image)
+    
+    
+    return Embedding(vector=embedding.tolist())

@@ -21,6 +21,9 @@ class AuthFaceUser(BaseModel):
     
 class SimilarityEmbedding(BaseModel):
     similarity: float
+
+class VectorEmbedding(BaseModel):
+    vector: List[float]
     
 class FaceUser(BaseModel):
     id: Optional[UUID]

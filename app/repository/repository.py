@@ -176,8 +176,8 @@ class EmbeddingRepository(IRepository):
             sql = (
                 select(db_Embedding)
                 .where(
-                    (db_Embedding.vector.l2_distance(vector)) < 1.2 # Порог схожести
-                )  
+                    (db_Embedding.vector.l2_distance(vector)) < 1.2  # Порог схожести
+                )
                 .order_by(db_Embedding.vector.l2_distance(vector))
                 .limit(1)
             )
@@ -186,6 +186,7 @@ class EmbeddingRepository(IRepository):
 
         if embedding:
             return Embedding(**embedding.dict())
+
     async def list(self, offset: int, limit: int = 10) -> List[Embedding]:
         sql = (
             select(db_Embedding)

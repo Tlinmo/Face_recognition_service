@@ -18,21 +18,26 @@ reco = RecognitionService()
 
 @router.post("/", response_model=schema.VectorEmbedding)
 async def image_to_embedding(file: UploadFile = File(...)):
-    if not file.content_type or not file.content_type.startswith('image/'):
-        raise HTTPException(status_code=400, detail="Загруженный файл не является изображением.")
+    if not file.content_type or not file.content_type.startswith("image/"):
+        raise HTTPException(
+            status_code=400, detail="Загруженный файл не является изображением."
+        )
 
     contents = await file.read()
-    
+
     if imghdr.what(None, contents) is None:
-        raise HTTPException(status_code=400, detail="Загруженный файл не является изображением.")
+        raise HTTPException(
+            status_code=400, detail="Загруженный файл не является изображением."
+        )
 
     nparr = np.frombuffer(contents, np.uint8)
     image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
     if image is None:
-        raise HTTPException(status_code=400, detail="Не удалось декодировать изображение.")
+        raise HTTPException(
+            status_code=400, detail="Не удалось декодировать изображение."
+        )
 
     embedding = reco.get_embedding(img=image)
-    
-    
+
     return Embedding(vector=embedding.tolist())

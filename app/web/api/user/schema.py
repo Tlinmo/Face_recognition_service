@@ -15,12 +15,13 @@ class UpdateUser(BaseModel):
 class VectorEmbedding(BaseModel):
     vector: List[float]
 
+
 class User(BaseModel):
     id: Optional[UUID]
     username: str
     is_superuser: bool
     embeddings: List[VectorEmbedding]
-    
+
     class Config:
         from_attributes = True
 

@@ -90,4 +90,3 @@ async def embedding_face_authentication(
         raise HTTPException(status_code=401, detail="Лицо не найдено в базе данных")
     except ServiceDataBaseError:
         raise HTTPException(status_code=503, detail="База данных недоступна")
-    

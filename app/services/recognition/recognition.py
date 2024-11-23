@@ -16,9 +16,7 @@ configure_logging()
 
 class RecognitionService(FaceAnalysis):
     def detect(self, img: np.ndarray, max_num=0):
-        bboxes, kpss = self.det_model.detect(img,
-                                             max_num=max_num,
-                                             metric='default')
+        bboxes, kpss = self.det_model.detect(img, max_num=max_num, metric="default")
         if bboxes.shape[0] == 0:
             return []
         ret = []
@@ -34,13 +32,17 @@ class RecognitionService(FaceAnalysis):
 
     def recognize(self, img: np.ndarray, faces):
         for _, face in enumerate(faces):
-            face.img = face_align.norm_crop(img, landmark=face.kps, image_size=self.models['recognition'].input_size[0])
+            face.img = face_align.norm_crop(
+                img,
+                landmark=face.kps,
+                image_size=self.models["recognition"].input_size[0],
+            )
             face.embedding = self.get_embedding(face.img)
             face.embedding = face.embedding / np.linalg.norm(face.embedding)
             face.img = cv2.resize(face.img, (0, 0), fx=2, fy=2)
 
     def get_embedding(self, img: np.ndarray) -> np.ndarray:
-        return self.models['recognition'].get_feat(img).flatten()
+        return self.models["recognition"].get_feat(img).flatten()
 
     @staticmethod
     def compare_euq(embs, emb2):
@@ -54,13 +56,13 @@ class RecognitionService(FaceAnalysis):
         index = np.argmin(dists)
         return dists[index], index
 
-    def draw_on(self, img: np.ndarray, faces, det_time='', rec_time=''):
+    def draw_on(self, img: np.ndarray, faces, det_time="", rec_time=""):
         dimg = img.copy()
 
         font = ImageFont.truetype("Fonts/DejaVuSans.ttf", 26)
         image_pil = Image.fromarray(dimg)
         draw = ImageDraw.Draw(image_pil)
-        draw.text((0, 0), det_time + '\n' + rec_time, font=font, fill=(255, 255, 255))
+        draw.text((0, 0), det_time + "\n" + rec_time, font=font, fill=(255, 255, 255))
         dimg = np.array(image_pil)
 
         for _, face in enumerate(faces):
@@ -72,12 +74,18 @@ class RecognitionService(FaceAnalysis):
                 color = (0, 0, 255)
 
             cv2.rectangle(dimg, (box[0], box[1]), (box[2], box[3]), color, 2)
-            cv2.rectangle(dimg, (box[0], box[3] - 35), (box[2], box[3]), color, cv2.FILLED)
+            cv2.rectangle(
+                dimg, (box[0], box[3] - 35), (box[2], box[3]), color, cv2.FILLED
+            )
 
-            font = ImageFont.truetype(APP_ROOT / "services/recognition/Fonts/DejaVuSans.ttf", 26)
+            font = ImageFont.truetype(
+                APP_ROOT / "services/recognition/Fonts/DejaVuSans.ttf", 26
+            )
             image_pil = Image.fromarray(dimg)
             draw = ImageDraw.Draw(image_pil)
-            draw.text((box[0] + 6, box[3] - 32), face.name, font=font, fill=(255, 255, 255))
+            draw.text(
+                (box[0] + 6, box[3] - 32), face.name, font=font, fill=(255, 255, 255)
+            )
             dimg = np.array(image_pil)
 
             if face.kps is not None:

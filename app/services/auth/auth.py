@@ -7,6 +7,7 @@ from app.settings import settings
 from app.repository.exceptions import UsernameError, DataBaseError
 from app.repository.repository import UserRepository, EmbeddingRepository
 from app.services.users.user import User
+from app.services.auth.embedding import Embedding
 from app.services.exceptions import (
     AuthFaceError,
     AuthUsernameError,
@@ -52,8 +53,8 @@ class AuthService:
             raise AuthPasswordError()
         raise AuthUsernameError()
 
-    async def face_authentication(self, embedding: List[float]) -> User:
-        _embedding = await self.embedding_repository.get(vector=embedding)
+    async def face_authentication(self, embedding: Embedding) -> User:
+        _embedding = await self.embedding_repository.get(vector=embedding.vector)
 
         if not _embedding:
             raise AuthFaceError
@@ -69,7 +70,7 @@ class AuthService:
             logger.debug(f"Узнается схожесть с embeddings пользователя")
             for user_embedding in user.embeddings:
                 similarity = np.linalg.norm(
-                    np.array(user_embedding.vector) - np.array(embedding)
+                    np.array(user_embedding.vector) - np.array(embedding.vector)
                 )
                 user_embedding.similarity = similarity
 

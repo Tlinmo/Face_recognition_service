@@ -20,3 +20,7 @@ class UserUpdateError(UserError):
 
 class ServiceDataBaseError(Exception):
     pass
+
+
+class EmbeddingVectorSizeError(ValueError):
+    pass

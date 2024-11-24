@@ -10,7 +10,7 @@ from app.log import configure_logging
 from app.repository.dependencies import get_db_session
 from app.repository.repository import UserRepository
 from app.services.users.users import UserService
-from app.services.exceptions import UserUpdateError, ServiceDataBaseError
+from app.services.exceptions import UserUpdateError, ServiceDataBaseError, EmbeddingVectorSizeError
 from app.services.users.user import User
 from app.web.api.user import schema
 
@@ -26,10 +26,10 @@ async def list_users(
     """Получение списка с дынными о пользователях"""
     logger.debug("Получаем список пользователей")
 
-    repo = UserRepository(session=session)
-    user_service = UserService(user_repository=repo)
-
     try:
+        repo = UserRepository(session=session)
+        user_service = UserService(user_repository=repo)
+
         users = await user_service.lst(offset=offset, limit=limit)
 
         return users
@@ -42,10 +42,10 @@ async def user_info(id_: UUID, session: AsyncSession = Depends(get_db_session)) 
     """Получение дынных о пользователе"""
     logger.debug(f"Получаем данные пользователя c id {id_}")
 
-    repo = UserRepository(session=session)
-    user_service = UserService(user_repository=repo)
-
     try:
+        repo = UserRepository(session=session)
+        user_service = UserService(user_repository=repo)
+
         user = await user_service.show(id_=id_)
         if user:
             return user
@@ -61,14 +61,16 @@ async def update(
     """Изменение данных о пользователе"""
     logger.debug(f"Обновляем данные пользователя c id {id_}")
 
-    repo = UserRepository(session=session)
-    user_service = UserService(user_repository=repo)
-
-    user = User(id=id_, username=_user.username, embeddings=_user.embeddings)
-
     try:
+        repo = UserRepository(session=session)
+        user_service = UserService(user_repository=repo)
+
+        user = User(id=id_, username=_user.username, embeddings=_user.embeddings)
+
         await user_service.update(user)
     except UserUpdateError:
         raise HTTPException(status_code=404, detail="Не найдено")
     except ServiceDataBaseError:
         raise HTTPException(status_code=503, detail="База данных недоступна")
+    except EmbeddingVectorSizeError:
+        raise HTTPException(status_code=400, detail="Вы использовали неверный размер вектора")

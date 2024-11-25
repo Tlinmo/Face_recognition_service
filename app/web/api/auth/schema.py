@@ -7,7 +7,7 @@ from pydantic import BaseModel
 class UserCreate(BaseModel):
     username: str
     password: str
-    embeddings: Optional[List[List[float]]]
+    embeddings: List[List[float]]
 
 
 class AuthUser(BaseModel):
@@ -16,7 +16,7 @@ class AuthUser(BaseModel):
 
 
 class AuthFaceUser(BaseModel):
-    embedding: Optional[List[float]]
+    embedding: List[float]
 
 
 class SimilarityEmbedding(BaseModel):

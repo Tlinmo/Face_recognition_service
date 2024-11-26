@@ -8,8 +8,9 @@ from app.log import configure_logging
 from app.repository.dependencies import get_db_session
 from app.repository.repository import EmbeddingRepository, UserRepository
 from app.services.auth.auth import AuthService
-from app.services.users.user import User
-from app.services.auth.embedding import Embedding
+from app.services.interface.user import IUser
+from app.services.models.user import User
+from app.services.models.embedding import Embedding
 from app.services.exceptions import (
     AuthUsernameError,
     AuthPasswordError,
@@ -79,7 +80,7 @@ async def authentication(
 @router.post("/face", response_model=schema.FaceUser, status_code=200)
 async def embedding_face_authentication(
     _user: schema.AuthFaceUser, session: AsyncSession = Depends(get_db_session)
-) -> User:
+) -> IUser:
     """Аунтификация пользователя по embedding"""
     logger.debug("Аунтификация пользователя по лицу")
 

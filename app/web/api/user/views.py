@@ -11,7 +11,8 @@ from app.repository.dependencies import get_db_session
 from app.repository.repository import UserRepository
 from app.services.users.users import UserService
 from app.services.exceptions import UserUpdateError, ServiceDataBaseError, EmbeddingVectorSizeError
-from app.services.users.user import User
+from app.services.models.user import User
+from app.services.interface.user import IUser
 from app.web.api.user import schema
 
 configure_logging()
@@ -22,7 +23,7 @@ router = APIRouter()
 @router.get("/", response_model=List[schema.Users], status_code=200)
 async def list_users(
     offset: int = 0, limit: int = 10, session: AsyncSession = Depends(get_db_session)
-) -> List[User]:
+) -> List[IUser]:
     """Получение списка с дынными о пользователях"""
     logger.debug("Получаем список пользователей")
 
@@ -38,7 +39,7 @@ async def list_users(
 
 
 @router.get("/{id_:str}", response_model=schema.User, status_code=200)
-async def user_info(id_: UUID, session: AsyncSession = Depends(get_db_session)) -> User:
+async def user_info(id_: UUID, session: AsyncSession = Depends(get_db_session)) -> IUser:
     """Получение дынных о пользователе"""
     logger.debug(f"Получаем данные пользователя c id {id_}")
 

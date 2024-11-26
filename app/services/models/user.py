@@ -5,17 +5,18 @@ import uuid
 from loguru import logger
 import bcrypt
 
-from app.services.auth.embedding import Embedding
+from app.services.interface.embedding import IEmbedding
+from app.services.models.embedding import Embedding
+from app.services.interface.user import IUser
 
-
-class User:
+class User(IUser):
     def __init__(
         self,
         username: str | None = None,
         hashed_password: str | None = None,
         id: uuid.UUID | None = None,
         is_superuser: bool = False,
-        embeddings: List[List[float]] | List[Embedding] = [],
+        embeddings: List[List[float]] | List[IEmbedding] = [],
     ) -> None:
         self.__embeddings = []
         self.id = id
@@ -31,21 +32,23 @@ class User:
         return hashed_password.decode("utf-8")
 
     def check_password(self, password: str) -> bool:
-        return bcrypt.checkpw(
-            password.encode("utf-8"), self.hashed_password.encode("utf-8")
-        )
+        if self.hashed_password:
+            return bcrypt.checkpw(
+                password.encode("utf-8"), self.hashed_password.encode("utf-8")
+            )
+        return False
 
     @property
-    def embeddings(self) -> List[Embedding]:
+    def embeddings(self) -> List[IEmbedding]:
         return self.__embeddings
 
     @embeddings.setter
-    def embeddings(self, _embeddings: List[List[float]] | List[Embedding] = []):
+    def embeddings(self, _embeddings: List[List[float]] | List[IEmbedding] = []):
         logger.debug("Пользователю задется его embedding")
 
         # А ты что думал? в сказку попал? а я слов больше не знаю
         for embedding in _embeddings:
-            if isinstance(embedding, Embedding):
+            if isinstance(embedding, IEmbedding):
                 logger.debug("Добавление Embedding в список")
 
                 self.__embeddings.append(embedding)

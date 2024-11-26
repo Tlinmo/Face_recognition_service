@@ -11,8 +11,10 @@ from sqlalchemy.orm import selectinload
 from pgvector.sqlalchemy.functions import avg
 
 from app.log import configure_logging
-from app.services.users.user import User
-from app.services.auth.embedding import Embedding
+from app.services.interface.user import IUser
+from app.services.interface.embedding import IEmbedding
+from app.services.models.user import User
+from app.services.models.embedding import Embedding
 from app.repository.models.users import User as db_User
 from app.repository.models.users import Embedding as db_Embedding
 from app.repository.exceptions import UsernameError, UpdateError, DataBaseError
@@ -62,7 +64,7 @@ class IRepository(Generic[T], ABC):
 
 
 class UserRepository(IRepository):
-    async def add(self, entity: User) -> User:
+    async def add(self, entity: IUser) -> IUser:
         db_user = db_User(
             username=entity.username,
             hashed_password=entity.hashed_password,
@@ -80,7 +82,7 @@ class UserRepository(IRepository):
         self,
         id_: uuid.UUID | None = None,
         username: str | None = None,
-    ) -> User | None:
+    ) -> IUser | None:
 
         if id_ is None and username is None:
             return None
@@ -101,7 +103,7 @@ class UserRepository(IRepository):
         if user:
             return User(**user.dict())
 
-    async def list(self, offset: int, limit: int = 10) -> List[User]:
+    async def list(self, offset: int, limit: int = 10) -> List[IUser]:
         sql = (
             select(db_User)
             .options(selectinload(db_User.embeddings))
@@ -112,7 +114,7 @@ class UserRepository(IRepository):
         users = users.scalars().all()
         return [User(**user.dict()) for user in users]
 
-    async def update(self, entity: User):
+    async def update(self, entity: IUser) -> None:
         sql = (
             select(db_User)
             .options(selectinload(db_User.embeddings))
@@ -142,7 +144,7 @@ class UserRepository(IRepository):
 
 
 class EmbeddingRepository(IRepository):
-    async def add(self, entity: Embedding) -> Embedding:
+    async def add(self, entity: IEmbedding) -> IEmbedding:
         db_embedding = db_Embedding(
             vector=entity.vector,
             user_id=entity.user_id,
@@ -158,7 +160,7 @@ class EmbeddingRepository(IRepository):
         self,
         id_: uuid.UUID | None = None,
         vector: List[float] = [],
-    ) -> Embedding | None:
+    ) -> IEmbedding | None:
         embedding = None
 
         if not id_ and not vector:
@@ -187,7 +189,7 @@ class EmbeddingRepository(IRepository):
         if embedding:
             return Embedding(**embedding.dict())
 
-    async def list(self, offset: int, limit: int = 10) -> List[Embedding]:
+    async def list(self, offset: int, limit: int = 10) -> List[IEmbedding]:
         sql = (
             select(db_Embedding)
             .options(selectinload(db_Embedding.user))
@@ -198,7 +200,7 @@ class EmbeddingRepository(IRepository):
         embeddings = embeddings.scalars().all()
         return [Embedding(**embedding.dict()) for embedding in embeddings]
 
-    async def update(self, entity: Embedding):
+    async def update(self, entity: IEmbedding) -> None:
         sql = (
             select(db_Embedding)
             .options(selectinload(db_Embedding.user))

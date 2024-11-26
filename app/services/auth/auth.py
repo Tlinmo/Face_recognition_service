@@ -6,8 +6,8 @@ from loguru import logger
 from app.settings import settings
 from app.repository.exceptions import UsernameError, DataBaseError
 from app.repository.repository import UserRepository, EmbeddingRepository
-from app.services.users.user import User
-from app.services.auth.embedding import Embedding
+from app.services.interface.embedding import IEmbedding
+from app.services.interface.user import IUser
 from app.services.exceptions import (
     AuthFaceError,
     AuthUsernameError,
@@ -26,7 +26,7 @@ class AuthService:
         self.user_repository = user_repository
         self.embedding_repository = embedding_repository
 
-    async def register(self, user: User) -> str:
+    async def register(self, user: IUser) -> str:
         try:
             _user = await self.user_repository.add(entity=user)
             logger.debug(_user.__dict__)
@@ -53,7 +53,7 @@ class AuthService:
             raise AuthPasswordError()
         raise AuthUsernameError()
 
-    async def face_authentication(self, embedding: Embedding) -> User:
+    async def face_authentication(self, embedding: IEmbedding) -> IUser:
         _embedding = await self.embedding_repository.get(vector=embedding.vector)
 
         if not _embedding:

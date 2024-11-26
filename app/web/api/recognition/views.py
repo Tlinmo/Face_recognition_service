@@ -7,7 +7,7 @@ import cv2
 
 from app.log import configure_logging
 from app.services.recognition.recognition import RecognitionService
-from app.services.auth.embedding import Embedding
+from app.services.models.embedding import Embedding
 from app.web.api.recognition import schema
 
 configure_logging()

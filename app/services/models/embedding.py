@@ -2,8 +2,9 @@ from typing import List
 import uuid
 
 from app.services.exceptions import EmbeddingVectorSizeError
+from app.services.interface.embedding import IEmbedding
 
-class Embedding:
+class Embedding(IEmbedding):
     def __init__(
         self,
         vector: List[float] = [],

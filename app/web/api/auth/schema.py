@@ -23,14 +23,10 @@ class SimilarityEmbedding(BaseModel):
     similarity: float
 
 
-class VectorEmbedding(BaseModel):
-    vector: List[float]
-
-
 class FaceUser(BaseModel):
     id: Optional[UUID]
     username: str
-    embeddings: List[SimilarityEmbedding]
+    faces: List[SimilarityEmbedding]
 
     class Config:
         from_attributes = True

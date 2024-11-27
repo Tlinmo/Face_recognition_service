@@ -6,7 +6,7 @@ from pydantic import BaseModel
 
 class UpdateUser(BaseModel):
     username: str
-    faces: List[List[float]]
+    embeddings: List[List[float]]
 
     class Config:
         from_attributes = True

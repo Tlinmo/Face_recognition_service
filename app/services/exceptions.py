@@ -2,7 +2,7 @@ class UserError(Exception):
     pass
 
 
-class AuthUsernameError(UserError):
+class ServiceUsernameError(UserError):
     pass
 
 

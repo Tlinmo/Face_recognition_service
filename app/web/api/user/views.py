@@ -10,7 +10,7 @@ from app.log import configure_logging
 from app.repository.dependencies import get_db_session
 from app.repository.repository import UserRepository
 from app.services.users.users import UserService
-from app.services.exceptions import UserUpdateError, ServiceDataBaseError, EmbeddingVectorSizeError
+from app.services.exceptions import UserUpdateError, ServiceDataBaseError, EmbeddingVectorSizeError, ServiceUsernameError
 from app.services.models.user import User
 from app.services.interface.user import IUser
 from app.web.api.user import schema
@@ -65,12 +65,13 @@ async def update(
     try:
         repo = UserRepository(session=session)
         user_service = UserService(user_repository=repo)
-
-        user = User(id=id_, username=_user.username, embeddings=_user.embeddings)
+        user = User(id=id_, username=_user.username, faces=_user.faces)
 
         await user_service.update(user)
     except UserUpdateError:
         raise HTTPException(status_code=404, detail="Не найдено")
+    except ServiceUsernameError:
+        raise HTTPException(status_code=401, detail="Такой логин уже есть")
     except ServiceDataBaseError:
         raise HTTPException(status_code=503, detail="База данных недоступна")
     except EmbeddingVectorSizeError:

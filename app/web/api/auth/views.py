@@ -6,13 +6,13 @@ from loguru import logger
 
 from app.log import configure_logging
 from app.repository.dependencies import get_db_session
-from app.repository.repository import EmbeddingRepository, UserRepository
+from app.repository.repository import FaceRepository, UserRepository
 from app.services.auth.auth import AuthService
 from app.services.interface.user import IUser
 from app.services.models.user import User
-from app.services.models.embedding import Embedding
+from app.services.models.face import Face
 from app.services.exceptions import (
-    AuthUsernameError,
+    ServiceUsernameError,
     AuthPasswordError,
     AuthFaceError,
     ServiceDataBaseError,
@@ -36,16 +36,16 @@ async def register(
 
     try:
         user_repo = UserRepository(session=session)
-        embedding_repo = EmbeddingRepository(session=session)
-        auth = AuthService(user_repository=user_repo, embedding_repository=embedding_repo)
+        face_repo = FaceRepository(session=session)
+        auth = AuthService(user_repository=user_repo, face_repository=face_repo)
         user = User(
             username=_user.username,
             hashed_password=User.hash_password(_user.password),
-            embeddings=_user.embeddings,
+            faces=_user.embeddings,
         )
         token = await auth.register(user)
         return token
-    except AuthUsernameError:
+    except ServiceUsernameError:
         raise HTTPException(status_code=409, detail="Такой пользователь уже есть")
     except ServiceDataBaseError:
         raise HTTPException(status_code=503, detail="База данных недоступна")
@@ -62,8 +62,8 @@ async def authentication(
 
     try:
         user_repo = UserRepository(session=session)
-        embedding_repo = EmbeddingRepository(session=session)
-        auth = AuthService(user_repository=user_repo, embedding_repository=embedding_repo)
+        face_repo = FaceRepository(session=session)
+        auth = AuthService(user_repository=user_repo, face_repository=face_repo)
 
         token = await auth.authentication(
             username=_user.username, password=_user.password
@@ -71,25 +71,25 @@ async def authentication(
         return token
     except AuthPasswordError:
         raise HTTPException(status_code=401, detail="Пароль не верный")
-    except AuthUsernameError:
+    except ServiceUsernameError:
         raise HTTPException(status_code=401, detail="Логин не верный")
     except ServiceDataBaseError:
         raise HTTPException(status_code=503, detail="База данных недоступна")
 
 
 @router.post("/face", response_model=schema.FaceUser, status_code=200)
-async def embedding_face_authentication(
+async def face_embeddings_authentication(
     _user: schema.AuthFaceUser, session: AsyncSession = Depends(get_db_session)
 ) -> IUser:
-    """Аунтификация пользователя по embedding"""
+    """Аунтификация пользователя по Face"""
     logger.debug("Аунтификация пользователя по лицу")
 
     try:
         user_repo = UserRepository(session=session)
-        embedding_repo = EmbeddingRepository(session=session)
-        auth = AuthService(user_repository=user_repo, embedding_repository=embedding_repo)
-        embedding = Embedding(vector=_user.embedding)
-        user = await auth.face_authentication(embedding=embedding)
+        face_repo = FaceRepository(session=session)
+        auth = AuthService(user_repository=user_repo, face_repository=face_repo)
+        face = Face(embedding=_user.embedding)
+        user = await auth.face_authentication(face=face)
         return user
     except AuthFaceError:
         raise HTTPException(status_code=401, detail="Лицо не найдено в базе данных")

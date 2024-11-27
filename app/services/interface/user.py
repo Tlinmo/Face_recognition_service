@@ -2,7 +2,7 @@ from typing import List
 import uuid
 from abc import ABC, abstractmethod
 
-from app.services.interface.embedding import IEmbedding
+from app.services.interface.face import IFace
 
 
 class IUser(ABC):
@@ -13,13 +13,13 @@ class IUser(ABC):
         hashed_password: str | None = None,
         id: uuid.UUID | None = None,
         is_superuser: bool = False,
-        embeddings: List[List[float]] | List[IEmbedding] = [],
+        faces: List[List[float]] | List[IFace] = [],
     ) -> None:
         self.id = id
         self.username = username
         self.hashed_password = hashed_password
         self.is_superuser = is_superuser
-        self.embeddings = embeddings
+        self.faces = faces
 
     @staticmethod
     @abstractmethod

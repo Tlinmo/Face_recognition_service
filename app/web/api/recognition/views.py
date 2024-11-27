@@ -7,7 +7,7 @@ import cv2
 
 from app.log import configure_logging
 from app.services.recognition.recognition import RecognitionService
-from app.services.models.embedding import Embedding
+from app.services.models.face import Face
 from app.web.api.recognition import schema
 
 configure_logging()
@@ -40,4 +40,4 @@ async def image_to_embedding(file: UploadFile = File(...)):
 
     embedding = reco.get_embedding(img=image)
 
-    return Embedding(vector=embedding.tolist())
+    return Face(embedding=embedding.tolist())

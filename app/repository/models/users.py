@@ -24,7 +24,7 @@ class User(Base):
     username = Column(String, unique=True, index=True)
     hashed_password = Column(String, index=True)
     is_superuser = Column(Boolean, default=False)
-    embeddings = relationship("Embedding", back_populates="user")
+    faces = relationship("Face", back_populates="user")
 
     def dict(self):
         return {
@@ -32,7 +32,7 @@ class User(Base):
             "username": self.username,
             "hashed_password": self.hashed_password,
             "is_superuser": self.is_superuser,
-            "embeddings": [embedding.vector for embedding in self.embeddings],
+            "faces": [face.embedding for face in self.faces],
         }
 
     def set_embeddings(self, embeddings: List[List[float]]):
@@ -40,24 +40,24 @@ class User(Base):
             for embedding in embeddings:
                 # Ну, мало ли кто захочет пустой список в списке отправить?
                 if embedding:
-                    self.embeddings.append(Embedding(vector=embedding))
+                    self.faces.append(Face(embedding=embedding))
                 else:
-                    self.embeddings = []
+                    self.faces = []
         else:
-            self.embeddings = []
+            self.faces = []
 
 
-class Embedding(Base):
-    __tablename__ = "embeddings"
+class Face(Base):
+    __tablename__ = "faces"
 
     id = Column(UUID, primary_key=True, default=generate_uuid)
     user_id = Column(UUID, ForeignKey("users.id"), nullable=False)
-    vector = Column(Vector(512), nullable=False)
-    user = relationship("User", back_populates="embeddings")
+    embedding = Column(Vector(512), nullable=False)
+    user = relationship("User", back_populates="faces")
 
     def dict(self):
         return {
             "id": self.id,
             "user_id": self.user_id,
-            "vector": self.vector,
+            "embedding": self.embedding,
         }

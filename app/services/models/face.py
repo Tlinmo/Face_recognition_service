@@ -1,33 +1,40 @@
 from typing import List
 import uuid
 
-from app.services.exceptions import EmbeddingVectorSizeError
-from app.services.interface.embedding import IEmbedding
+from loguru import logger
 
-class Embedding(IEmbedding):
+from app.services.exceptions import EmbeddingVectorSizeError
+from app.services.interface.face import IFace
+from app.log import configure_logging
+
+configure_logging()
+
+
+class Face(IFace):
     def __init__(
         self,
-        vector: List[float] = [],
+        embedding: List[float] = [],
         user_id: uuid.UUID | None = None,
         id: uuid.UUID | None = None,
         similarity: float | None = None,
     ) -> None:
-        self.__vector: List[float] = []
+        self.__embedding: List[float] = []
         self.id = id
-        self.vector = vector
+        self.embedding = embedding
         self.user_id = user_id
         self.similarity = similarity
 
 
     @property
-    def vector(self):
-        return self.__vector
+    def embedding(self):
+        return self.__embedding
 
-    @vector.setter
-    def vector(self, value: List[float]):
+    @embedding.setter
+    def embedding(self, value: List[float]):
         try:
+            logger.debug(f"Количество элементов в embedding {len(value)}")
             if len(value) == 512:
-                self.__vector = value
+                self.__embedding = value
             else:
                 raise EmbeddingVectorSizeError("Требуется использовать 512 мерный вектор")
         except TypeError:

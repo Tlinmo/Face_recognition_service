@@ -4,4 +4,4 @@ from pydantic import BaseModel
 
 
 class VectorEmbedding(BaseModel):
-    vector: List[float]
+    embedding: List[float]

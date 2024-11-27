@@ -5,8 +5,8 @@ import uuid
 from loguru import logger
 import bcrypt
 
-from app.services.interface.embedding import IEmbedding
-from app.services.models.embedding import Embedding
+from app.services.interface.face import IFace
+from app.services.models.face import Face
 from app.services.interface.user import IUser
 
 class User(IUser):
@@ -16,14 +16,14 @@ class User(IUser):
         hashed_password: str | None = None,
         id: uuid.UUID | None = None,
         is_superuser: bool = False,
-        embeddings: List[List[float]] | List[IEmbedding] = [],
+        faces: List[List[float]] | List[IFace] = [],
     ) -> None:
-        self.__embeddings = []
+        self.__faces = []
         self.id = id
         self.username = username
         self.hashed_password = hashed_password
         self.is_superuser = is_superuser
-        self.embeddings = embeddings
+        self.faces = faces
 
     @staticmethod
     def hash_password(password: str) -> str:
@@ -39,26 +39,26 @@ class User(IUser):
         return False
 
     @property
-    def embeddings(self) -> List[IEmbedding]:
-        return self.__embeddings
+    def faces(self) -> List[IFace]:
+        return self.__faces
 
-    @embeddings.setter
-    def embeddings(self, _embeddings: List[List[float]] | List[IEmbedding] = []):
-        logger.debug("Пользователю задется его embedding")
+    @faces.setter
+    def faces(self, _faces: List[List[float]] | List[IFace] = []):
+        logger.debug("Пользователю задется его faces")
 
         # А ты что думал? в сказку попал? а я слов больше не знаю
-        for embedding in _embeddings:
-            if isinstance(embedding, IEmbedding):
-                logger.debug("Добавление Embedding в список")
+        for embedding in _faces:
+            if isinstance(embedding, IFace):
+                logger.debug("Добавление Face в список")
 
-                self.__embeddings.append(embedding)
+                self.__faces.append(embedding)
             elif isinstance(embedding, (np.ndarray, List)):
-                logger.debug("Создания объектов Embedding из списка")
+                logger.debug("Создания объектов Face из списка")
 
-                _embedding = Embedding(vector=embedding)
+                _face = Face(embedding=embedding)
                 if self.id:
-                    _embedding.user_id = self.id
-                self.__embeddings.append(_embedding)
+                    _face.user_id = self.id
+                self.__faces.append(_face)
             else:
                 raise ValueError(
                     f"Элементы должны быть либо списками чисел, либо объектами Embedding. На вход было получено {type(embedding)}"

@@ -1,22 +1,21 @@
 from typing import List, TypeVar, Generic
 from abc import ABC, abstractmethod
 import uuid
-import numpy as np
 
 from loguru import logger
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import delete, func, select, or_
+from sqlalchemy import delete, select, or_
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import selectinload
-from pgvector.sqlalchemy.functions import avg
+
 
 from app.log import configure_logging
 from app.services.interface.user import IUser
-from app.services.interface.embedding import IEmbedding
+from app.services.interface.face import IFace
 from app.services.models.user import User
-from app.services.models.embedding import Embedding
+from app.services.models.face import Face
 from app.repository.models.users import User as db_User
-from app.repository.models.users import Embedding as db_Embedding
+from app.repository.models.users import Face as db_Face
 from app.repository.exceptions import UsernameError, UpdateError, DataBaseError
 
 configure_logging()
@@ -55,11 +54,12 @@ class IRepository(Generic[T], ABC):
             raise UsernameError("Username уже занят")
         except SQLAlchemyError as error:
             error_type = type(error)
-            logger.error(f" {error_type} | {error}")
+            logger.error(f" {error_type} | asdasdcasdcascdascdascd {error}")
             await self.session.rollback()
             raise DataBaseError()
         except Exception as error:
             logger.error(error)
+            logger.error("ЕБАКА БЛЯТЬ!")
             await self.session.rollback()
 
 
@@ -71,7 +71,7 @@ class UserRepository(IRepository):
             is_superuser=entity.is_superuser,
         )
         # Итс нот гуд да? блять..
-        db_user.set_embeddings([embd.vector for embd in entity.embeddings])
+        db_user.set_embeddings([f.embedding for f in entity.faces])
 
         self.session.add(db_user)
         await self.save()
@@ -87,7 +87,7 @@ class UserRepository(IRepository):
         if id_ is None and username is None:
             return None
 
-        sql = select(db_User).options(selectinload(db_User.embeddings))
+        sql = select(db_User).options(selectinload(db_User.faces))
 
         filters = []
         if id_:
@@ -106,7 +106,7 @@ class UserRepository(IRepository):
     async def list(self, offset: int, limit: int = 10) -> List[IUser]:
         sql = (
             select(db_User)
-            .options(selectinload(db_User.embeddings))
+            .options(selectinload(db_User.faces))
             .offset(offset)
             .limit(limit)
         )
@@ -115,104 +115,107 @@ class UserRepository(IRepository):
         return [User(**user.dict()) for user in users]
 
     async def update(self, entity: IUser) -> None:
-        sql = (
-            select(db_User)
-            .options(selectinload(db_User.embeddings))
-            .where(db_User.id == entity.id)
-        )
-        _user = await self.session.execute(sql)
-        _user = _user.scalars().one_or_none()
-
-        if _user is None:
-            raise UpdateError("User не найден")
-
-        if entity.username:
-            logger.debug(
-                f"Изменяем имя пользователя {_user.username} на {entity.username}"
+        try:
+            sql = (
+                select(db_User)
+                .options(selectinload(db_User.faces))
+                .where(db_User.id == entity.id)
             )
-            _user.username = entity.username
+            _user = await self.session.execute(sql)
+            _user = _user.scalars().one_or_none()
 
-        if entity.embeddings:
-            logger.debug(f"Изменяем embeddings пользователя")
+            if _user is None:
+                raise UpdateError("User не найден")
 
-            await self.session.execute(
-                delete(db_Embedding).where(db_Embedding.user_id == entity.id)
-            )
-            _user.set_embeddings([embd.vector for embd in entity.embeddings])
+            if entity.username:
+                logger.debug(
+                    f"Изменяем имя пользователя {_user.username} на {entity.username}"
+                )
+                _user.username = entity.username
 
+            if entity.faces:
+                logger.debug(f"Изменяем faces пользователя")
+
+                await self.session.execute(
+                    delete(db_Face).where(db_Face.user_id == entity.id)
+                )
+                _user.set_embeddings([f.embedding for f in entity.faces])
+        except IntegrityError as error:
+            raise UsernameError("Username уже занят")
+        
         await self.save()
 
 
-class EmbeddingRepository(IRepository):
-    async def add(self, entity: IEmbedding) -> IEmbedding:
-        db_embedding = db_Embedding(
-            vector=entity.vector,
+class FaceRepository(IRepository):
+    async def add(self, entity: IFace) -> IFace:
+        db_face = db_Face(
+            embedding=entity.embedding,
             user_id=entity.user_id,
         )
 
-        self.session.add(db_embedding)
+        self.session.add(db_Face)
         await self.save()
 
-        _embedding = Embedding(**db_embedding.dict())
-        return _embedding
+        _face = Face(**db_face.dict())
+        return _face
 
     async def get(
         self,
         id_: uuid.UUID | None = None,
-        vector: List[float] = [],
-    ) -> IEmbedding | None:
-        embedding = None
+        embedding: List[float] = [],
+    ) -> IFace | None:
+        face = None
 
-        if not id_ and not vector:
+        if not id_ and not embedding:
             return None
 
         if id_:
             sql = (
-                select(db_Embedding)
-                .options(selectinload(db_Embedding.user))
-                .where(db_Embedding.id == id_)
+                select(db_Face)
+                .options(selectinload(db_Face.user))
+                .where(db_Face.id == id_)
             )
-            embedding = await self.session.execute(sql)
-            embedding = embedding.scalars().one_or_none()
-        if vector:
+            face = await self.session.execute(sql)
+            face = face.scalars().one_or_none()
+        if embedding:
             sql = (
-                select(db_Embedding)
+                select(db_Face)
                 .where(
-                    (db_Embedding.vector.l2_distance(vector)) < 1.2  # Порог схожести
+                    (db_Face.embedding.l2_distance(embedding)) < 1.2  # Порог схожести
                 )
-                .order_by(db_Embedding.vector.l2_distance(vector))
+                .order_by(db_Face.embedding.l2_distance(embedding))
                 .limit(1)
             )
-            embedding = await self.session.execute(sql)
-            embedding = embedding.scalars().one_or_none()
+            face = await self.session.execute(sql)
+            face = face.scalars().one_or_none()
 
-        if embedding:
-            return Embedding(**embedding.dict())
+        if face:
+            return Face(**face.dict())
 
-    async def list(self, offset: int, limit: int = 10) -> List[IEmbedding]:
+    async def list(self, offset: int, limit: int = 10) -> List[IFace]:
         sql = (
-            select(db_Embedding)
-            .options(selectinload(db_Embedding.user))
+            select(db_Face)
+            .options(selectinload(db_Face.user))
             .offset(offset)
             .limit(limit)
         )
-        embeddings = await self.session.execute(sql)
-        embeddings = embeddings.scalars().all()
-        return [Embedding(**embedding.dict()) for embedding in embeddings]
+        faces = await self.session.execute(sql)
+        faces = faces.scalars().all()
+        return [Face(**face.dict()) for face in faces]
 
-    async def update(self, entity: IEmbedding) -> None:
+    async def update(self, entity: IFace) -> None:
         sql = (
-            select(db_Embedding)
-            .options(selectinload(db_Embedding.user))
-            .where(db_Embedding.id == entity.id)
+            select(db_Face)
+            .options(selectinload(db_Face.user))
+            .where(db_Face.id == entity.id)
         )
-        _embedding = await self.session.execute(sql)
-        _embedding = _embedding.scalars().one_or_none()
+        _face = await self.session.execute(sql)
+        _face = _face.scalars().one_or_none()
 
-        if _embedding is None:
-            raise UpdateError("Embedding не найден")
+        if _face is None:
+            raise UpdateError("Face не найден")
 
-        if entity.vector:
-            _embedding.vector = entity.vector
+        if entity.embedding:
+            _face.embedding = entity.embedding
 
         await self.save()

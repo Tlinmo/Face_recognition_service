@@ -5,8 +5,8 @@ from loguru import logger
 
 from app.repository.repository import UserRepository
 from app.services.interface.user import IUser
-from app.repository.exceptions import UpdateError
-from app.services.exceptions import UserUpdateError
+from app.repository.exceptions import UpdateError, UsernameError
+from app.services.exceptions import UserUpdateError, ServiceUsernameError
 from app.log import configure_logging
 
 configure_logging()
@@ -30,3 +30,5 @@ class UserService:
             await self.user_repository.update(entity=user)
         except UpdateError:
             raise UserUpdateError()
+        except UsernameError:
+            raise ServiceUsernameError()

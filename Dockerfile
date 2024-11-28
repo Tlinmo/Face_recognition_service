@@ -3,6 +3,14 @@ FROM python:3.11.4-slim-bullseye as prod
 
 RUN pip install poetry==1.8.2
 
+# Install build dependencies and OpenCV dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
 # Configuring poetry
 RUN poetry config virtualenvs.create false
 RUN poetry config cache-dir /tmp/poetry_cache

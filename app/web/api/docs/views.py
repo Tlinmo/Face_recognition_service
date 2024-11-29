@@ -9,7 +9,7 @@ from fastapi.responses import HTMLResponse
 router = APIRouter()
 
 
-@router.get("/docs", include_in_schema=False)
+@router.get("/", include_in_schema=False)
 async def swagger_ui_html(request: Request) -> HTMLResponse:
     """
     Swagger UI.
@@ -51,3 +51,5 @@ async def redoc_html(request: Request) -> HTMLResponse:
         title=f"{title} - ReDoc",
         redoc_js_url="/static/docs/redoc.standalone.js",
     )
+
+    

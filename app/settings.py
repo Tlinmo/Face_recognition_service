@@ -36,6 +36,9 @@ class Settings(BaseSettings):
     # Current environment
     environment: str = "dev"
 
+    # Toggle authentication
+    auth_on: bool = True
+    
     log_level: LogLevel = LogLevel.DEBUG
     # Variables for the database
     db_host: str = "localhost"

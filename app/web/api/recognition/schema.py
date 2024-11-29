@@ -3,5 +3,7 @@ from typing import List
 from pydantic import BaseModel
 
 
-class VectorEmbedding(BaseModel):
+class FaceEmbedding(BaseModel):
     embedding: List[float]
+
+    

@@ -38,6 +38,9 @@ class AuthorizeRequestMiddleware(BaseHTTPMiddleware):
         if request.url.path.startswith("/api/openapi.json"):
             return await call_next(request)
         
+        if request.url.path.startswith("/static/docs"):
+            return await call_next(request)
+        
         if request.url.path.startswith("/api/auth"):
             return await call_next(request)
         

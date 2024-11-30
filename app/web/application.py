@@ -12,11 +12,13 @@ from starlette.middleware.base import (
 from starlette.requests import Request
 from starlette.responses import Response, JSONResponse
 from loguru import logger
+import jwt
 
 from app.log import configure_logging
 from app.web.api.router import api_router
 from app.web.lifespan import lifespan_setup
 from app.settings import settings
+from app.services.auth.auth import decode_and_validate_token 
 
 configure_logging()
 
@@ -32,19 +34,15 @@ class AuthorizeRequestMiddleware(BaseHTTPMiddleware):
         logger.debug(request.url.path)
         
         # Разрешаем ендпоинты, которые будет доступны без авторизации
-        if request.url.path.startswith("/api/docs"):
-            return await call_next(request)
-
-        if request.url.path.startswith("/api/openapi.json"):
-            return await call_next(request)
+        open_endpoints = [
+            "/api/docs",
+            "/api/openapi.json",
+            "/static/docs",
+            "/api/auth",
+            "/api/ai",
+        ]
         
-        if request.url.path.startswith("/static/docs"):
-            return await call_next(request)
-        
-        if request.url.path.startswith("/api/auth"):
-            return await call_next(request)
-        
-        if request.url.path.startswith("/api/ai"):
+        if any(request.url.path.startswith(endpoint) for endpoint in open_endpoints):
             return await call_next(request)
         
         if request.method == "OPTIONS":
@@ -56,22 +54,28 @@ class AuthorizeRequestMiddleware(BaseHTTPMiddleware):
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 content={
                     "detail": "Missing access token",
-                    "body": "Missing access token",
                 },
             )
         try:
             auth_token = bearer_token.split()[1].strip()
-            token_payload = f"Как будто тут параментры токена {auth_token}"
+            token_payload = decode_and_validate_token(auth_token)
+            request.state.user_id = token_payload["sub"]
+        except jwt.ExpiredSignatureError:
+            return JSONResponse(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                content={"detail": "Token has expired"},
+            )
+        except jwt.InvalidTokenError as e:
+            return JSONResponse(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                content={"detail": str(e)},
+            )
         except Exception as error:
             return JSONResponse(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                content={
-                  "detail": str(error),
-                  "body": str(error),  
-                },
+                content={"detail": str(error)},
             )
-        else:
-            request.state.user_id = f"{token_payload} и из них вытащили id юзера"
+
         return await call_next(request)
     
 def get_app() -> FastAPI:

@@ -28,6 +28,7 @@ class Settings(BaseSettings):
 
     host: str = "127.0.0.1"
     port: int = 8000
+    iss: str = "127.0.0.1"
     # quantity of workers for uvicorn
     workers_count: int = 1
     # Enable uvicorn reloading
@@ -48,6 +49,9 @@ class Settings(BaseSettings):
     db_base: str = "postgres"
     db_echo: bool = False
 
+    secret_key: str = ""
+    public_key: str = ""
+    
     @property
     def db_url(self) -> URL:
         """
@@ -64,6 +68,16 @@ class Settings(BaseSettings):
             path=f"/{self.db_base}",
         )
 
+    
+    @property
+    def base_url(self) -> str:
+        """
+        Assemble the base URL from host and port.
+
+        :return: base URL.
+        """
+        return f"http://{self.host}:{self.port}" if self.environment == "dev" else f"https://{self.iss}"
+    
     model_config = SettingsConfigDict(
         env_file=".env",
         env_prefix="APP_",

@@ -1,7 +1,9 @@
-from typing import List
 import numpy as np
+from datetime import datetime, UTC, timedelta
+from uuid import UUID
 
 from loguru import logger
+import jwt
 
 from app.settings import settings
 from app.repository.exceptions import UsernameError, DataBaseError
@@ -19,6 +21,27 @@ from app.log import configure_logging
 configure_logging()
 
 
+def generate_jwt(id_: UUID) -> str:
+    now = datetime.now(UTC)
+    payload = {
+        "iss": settings.base_url,
+        "sub": str(id_),  # Преобразуем UUID в строку
+        "aud": f"{settings.base_url}/api/",
+        "iat": now.timestamp(),
+        "exp": (now + timedelta(hours=24)).timestamp(),
+        "scope": "bopenid",
+    }
+
+    return jwt.encode(payload, settings.secret_key, algorithm="RS256")
+
+def decode_and_validate_token(access_token):
+    return jwt.decode(
+        access_token,
+        key=settings.public_key,
+        algorithms=["RS256"],
+        audience=[f"{settings.base_url}/api/"],
+    )
+
 class AuthService:
     def __init__(
         self, user_repository: UserRepository, face_repository: FaceRepository
@@ -33,8 +56,7 @@ class AuthService:
 
             # Если id к этому моменту нет, сработает исключение на уровне репозитория
             if _user.id:
-                # return generate_jwt(id_=_user.id)
-                return "Всё збс"
+                return generate_jwt(id_=_user.id)
             else:
                 return "Кажется всё пошло по ***** чекай логи"
 
@@ -49,7 +71,7 @@ class AuthService:
         _user = await self.user_repository.get(username=username)
         if _user:
             if _user.check_password(password):
-                return "тут типа токен? а зач?"
+                return generate_jwt(id_=_user.id)
             raise AuthPasswordError()
         raise ServiceUsernameError()
 

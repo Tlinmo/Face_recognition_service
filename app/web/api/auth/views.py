@@ -26,10 +26,10 @@ configure_logging()
 router = APIRouter()
 
 
-@router.post("/create", status_code=201)
+@router.post("/create", status_code=201, response_model=schema.TokenResponse)
 async def register(
     _user: schema.UserCreate, session: AsyncSession = Depends(get_db_session)
-) -> str:
+):
     """Cоздание пользователя"""
 
     logger.debug("Создание пользователя")
@@ -44,7 +44,11 @@ async def register(
             faces=_user.embeddings,
         )
         token = await auth.register(user)
-        return token
+        return {
+            "access_token": token,
+            "token_type": "Bearer",
+        }
+
     except ServiceUsernameError:
         raise HTTPException(status_code=409, detail="Такой пользователь уже есть")
     except ServiceDataBaseError:
@@ -53,10 +57,10 @@ async def register(
         raise HTTPException(status_code=400, detail="Вы использовали неверный размер вектора")
 
 
-@router.post("/login", status_code=200)
+@router.post("/login", status_code=200, response_model=schema.TokenResponse)
 async def authentication(
     _user: schema.AuthUser, session: AsyncSession = Depends(get_db_session)
-) -> str:
+):
     """Авторизация пользователя"""
     logger.debug("Авторизация пользователя")
 
@@ -68,7 +72,10 @@ async def authentication(
         token = await auth.authentication(
             username=_user.username, password=_user.password
         )
-        return token
+        return {
+            "access_token": token,
+            "token_type": "Bearer",
+        }
     except AuthPasswordError:
         raise HTTPException(status_code=401, detail="Пароль не верный")
     except ServiceUsernameError:
@@ -80,7 +87,7 @@ async def authentication(
 @router.post("/face", response_model=schema.FaceUser, status_code=200)
 async def face_embeddings_authentication(
     _user: schema.AuthFaceUser, session: AsyncSession = Depends(get_db_session)
-) -> IUser:
+):
     """Аунтификация пользователя по Face"""
     logger.debug("Аунтификация пользователя по лицу")
 

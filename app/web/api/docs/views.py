@@ -51,5 +51,3 @@ async def redoc_html(request: Request) -> HTMLResponse:
         title=f"{title} - ReDoc",
         redoc_js_url="/static/docs/redoc.standalone.js",
     )
-
-    

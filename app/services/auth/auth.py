@@ -34,6 +34,7 @@ def generate_jwt(id_: UUID) -> str:
 
     return jwt.encode(payload, settings.secret_key, algorithm="RS256")
 
+
 def decode_and_validate_token(access_token):
     return jwt.decode(
         access_token,
@@ -41,6 +42,7 @@ def decode_and_validate_token(access_token):
         algorithms=["RS256"],
         audience=[f"{settings.base_url}/api/"],
     )
+
 
 class AuthService:
     def __init__(

@@ -14,8 +14,9 @@ from app.web.api.recognition import schema
 configure_logging()
 
 router = APIRouter()
-reco = RecognitionService(name="buffalo_l", providers=['CUDAExecutionProvider'])
-reco.prepare(ctx_id=0, det_size=(640,640))
+reco = RecognitionService(name="buffalo_l", providers=["CUDAExecutionProvider"])
+reco.prepare(ctx_id=0, det_size=(640, 640))
+
 
 @router.post("/", response_model=List[schema.FaceEmbedding])
 async def image_to_embedding(file: UploadFile = File(...)):

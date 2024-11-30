@@ -9,6 +9,7 @@ from app.services.interface.face import IFace
 from app.services.models.face import Face
 from app.services.interface.user import IUser
 
+
 class User(IUser):
     def __init__(
         self,

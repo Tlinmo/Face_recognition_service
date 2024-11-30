@@ -25,6 +25,7 @@ class IUser(ABC):
     @abstractmethod
     def hash_password(password: str) -> str:
         pass
+
     @abstractmethod
     def check_password(self, password: str) -> bool:
         pass

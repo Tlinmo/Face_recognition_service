@@ -39,7 +39,7 @@ class Settings(BaseSettings):
 
     # Toggle authentication
     auth_on: bool = True
-    
+
     log_level: LogLevel = LogLevel.DEBUG
     # Variables for the database
     db_host: str = "localhost"
@@ -51,7 +51,7 @@ class Settings(BaseSettings):
 
     secret_key: str = ""
     public_key: str = ""
-    
+
     @property
     def db_url(self) -> URL:
         """
@@ -68,7 +68,6 @@ class Settings(BaseSettings):
             path=f"/{self.db_base}",
         )
 
-    
     @property
     def base_url(self) -> str:
         """
@@ -76,8 +75,12 @@ class Settings(BaseSettings):
 
         :return: base URL.
         """
-        return f"http://{self.host}:{self.port}" if self.environment == "dev" else f"https://{self.iss}"
-    
+        return (
+            f"http://{self.host}:{self.port}"
+            if self.environment == "dev"
+            else f"https://{self.iss}"
+        )
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_prefix="APP_",

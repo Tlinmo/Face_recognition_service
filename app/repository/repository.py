@@ -142,7 +142,7 @@ class UserRepository(IRepository):
                 _user.set_embeddings([f.embedding for f in entity.faces])
         except IntegrityError as error:
             raise UsernameError("Username уже занят")
-        
+
         await self.save()
 
 

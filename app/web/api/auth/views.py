@@ -52,7 +52,9 @@ async def register(
     except ServiceDataBaseError:
         raise HTTPException(status_code=503, detail="База данных недоступна")
     except EmbeddingVectorSizeError:
-        raise HTTPException(status_code=400, detail="Вы использовали неверный размер вектора")
+        raise HTTPException(
+            status_code=400, detail="Вы использовали неверный размер вектора"
+        )
 
 
 @router.post("/login", status_code=200, response_model=schema.TokenResponse)
@@ -101,4 +103,6 @@ async def face_embeddings_authentication(
     except ServiceDataBaseError:
         raise HTTPException(status_code=503, detail="База данных недоступна")
     except EmbeddingVectorSizeError:
-        raise HTTPException(status_code=400, detail="Вы использовали неверный размер вектора")
+        raise HTTPException(
+            status_code=400, detail="Вы использовали неверный размер вектора"
+        )

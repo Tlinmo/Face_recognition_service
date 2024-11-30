@@ -24,7 +24,6 @@ class Face(IFace):
         self.user_id = user_id
         self.similarity = similarity
 
-
     @property
     def embedding(self):
         return self.__embedding
@@ -36,6 +35,8 @@ class Face(IFace):
             if len(value) == 512:
                 self.__embedding = value
             else:
-                raise EmbeddingVectorSizeError("Требуется использовать 512 мерный вектор")
+                raise EmbeddingVectorSizeError(
+                    "Требуется использовать 512 мерный вектор"
+                )
         except TypeError:
-                raise ValueError("Тип не поддеживается")
+            raise ValueError("Тип не поддеживается")

@@ -33,7 +33,6 @@ async def list_users(
 ) -> List[IUser]:
     """Получение списка с дынными о пользователях"""
     logger.debug("Получаем список пользователей")
-    logger.debug(settings.secret_key)
     logger.debug(request.state.user_id) # Тут id который был присвоен в middleware
     
     try:

@@ -1,5 +1,3 @@
-import imghdr
-
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import APIRouter, Depends, HTTPException
 from loguru import logger

@@ -25,7 +25,7 @@ def generate_jwt(id_: UUID) -> str:
     now = datetime.now(UTC)
     payload = {
         "iss": settings.base_url,
-        "sub": str(id_),  # Преобразуем UUID в строку
+        "sub": str(id_),
         "aud": f"{settings.base_url}/api/",
         "iat": now.timestamp(),
         "exp": (now + timedelta(hours=24)).timestamp(),
@@ -86,8 +86,6 @@ class AuthService:
         if not user:
             raise AuthFaceError
 
-        # Узнаем схожесть с Faces пользователя
-        # Что лучше, использовать это, или __debug__? хм..
         if settings.environment == "dev":
             logger.debug(f"Узнается схожесть с embeddings пользователя")
             for user_face in user.faces:

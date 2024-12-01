@@ -10,8 +10,8 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
-from app.db.dependencies import get_db_session
-from app.db.utils import create_database, drop_database
+from app.repository.dependencies import get_db_session
+from app.repository.utils import create_database, drop_database
 from app.settings import settings
 from app.web.application import get_app
 
@@ -33,8 +33,8 @@ async def _engine() -> AsyncGenerator[AsyncEngine, None]:
 
     :yield: new engine.
     """
-    from app.db.meta import meta
-    from app.db.models import load_all_models
+    from app.repository.meta import meta
+    from app.repository.models import load_all_models
 
     load_all_models()
 

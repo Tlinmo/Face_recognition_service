@@ -14,7 +14,7 @@ from app.web.api.recognition import schema
 configure_logging()
 
 router = APIRouter()
-reco = RecognitionService(name="buffalo_l", providers=["CUDAExecutionProvider"])
+reco = RecognitionService(name="buffalo_l", providers=["CPUExecutionProvider"])
 reco.prepare(ctx_id=0, det_size=(640, 640))
 
 

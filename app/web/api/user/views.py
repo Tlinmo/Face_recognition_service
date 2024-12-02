@@ -44,6 +44,11 @@ async def list_users(
     logger.debug("Получаем список пользователей")
     logger.debug(request.state.user_id)  # Тут id который был присвоен в middleware
 
+    if limit <= 0 or offset < 0:
+        raise HTTPException(
+            status_code=400, detail="offset и limit должны быть положительны"
+        )
+    
     try:
         repo = UserRepository(session=session)
         user_service = UserService(user_repository=repo)

@@ -9,8 +9,8 @@ class IUser(ABC):
     @abstractmethod
     def __init__(
         self,
-        username: str | None = None,
-        hashed_password: str | None = None,
+        username: str,
+        hashed_password: str = "",
         id: uuid.UUID | None = None,
         is_superuser: bool = False,
         faces: List[List[float]] | List[IFace] = [],

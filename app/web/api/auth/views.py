@@ -15,6 +15,7 @@ from app.services.exceptions import (
     AuthFaceError,
     ServiceDataBaseError,
     EmbeddingVectorSizeError,
+    UserError,
 )
 from app.web.api.auth import schema
 
@@ -55,6 +56,11 @@ async def register(
         raise HTTPException(
             status_code=400, detail="Вы использовали неверный размер вектора"
         )
+    except ValueError:
+        # Нужно будет улучшить валидацию здесь
+        raise HTTPException(
+            status_code=400, detail="Вы использовали некоректные данные при регистрации"
+        )
 
 
 @router.post("/login", status_code=200, response_model=schema.TokenResponse)
@@ -68,9 +74,11 @@ async def authentication(
         user_repo = UserRepository(session=session)
         face_repo = FaceRepository(session=session)
         auth = AuthService(user_repository=user_repo, face_repository=face_repo)
-
+        user = User(
+            username=_user.username,
+        )
         token = await auth.authentication(
-            username=_user.username, password=_user.password
+            user=user, password=_user.password
         )
         return {
             "access_token": token,
@@ -82,6 +90,8 @@ async def authentication(
         raise HTTPException(status_code=401, detail="Логин не верный")
     except ServiceDataBaseError:
         raise HTTPException(status_code=503, detail="База данных недоступна")
+    except ValueError:
+        raise HTTPException(status_code=401, detail="Некоректные данные")
 
 
 @router.post("/face", response_model=schema.FaceUser, status_code=200)

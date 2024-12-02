@@ -69,8 +69,8 @@ class AuthService:
             logger.debug(error)
             raise ServiceDataBaseError()
 
-    async def authentication(self, username: str, password: str) -> str:
-        _user = await self.user_repository.get(username=username)
+    async def authentication(self, user: IUser, password: str) -> str:
+        _user = await self.user_repository.get(username=user.username)
         if _user:
             if _user.check_password(password):
                 return generate_jwt(id_=_user.id)

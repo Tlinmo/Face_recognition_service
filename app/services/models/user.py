@@ -1,6 +1,7 @@
 from typing import List
 import numpy as np
 import uuid
+import string
 
 from loguru import logger
 import bcrypt
@@ -13,13 +14,14 @@ from app.services.interface.user import IUser
 class User(IUser):
     def __init__(
         self,
-        username: str | None = None,
-        hashed_password: str | None = None,
+        username: str,
+        hashed_password: str = "",
         id: uuid.UUID | None = None,
         is_superuser: bool = False,
         faces: List[List[float]] | List[IFace] = [],
     ) -> None:
         self.__faces = []
+        self.__username = None
         self.id = id
         self.username = username
         self.hashed_password = hashed_password
@@ -28,6 +30,10 @@ class User(IUser):
 
     @staticmethod
     def hash_password(password: str) -> str:
+        if not password:
+            raise ValueError(
+                    f"Пароль пользователя не может быть пустым. На вход было получено {type(password)}"
+            )
         salt = bcrypt.gensalt()
         hashed_password = bcrypt.hashpw(password.encode("utf-8"), salt)
         return hashed_password.decode("utf-8")
@@ -47,7 +53,6 @@ class User(IUser):
     def faces(self, _faces: List[List[float]] | List[IFace] = []):
         logger.debug("Пользователю задется его faces")
 
-        # А ты что думал? в сказку попал? а я слов больше не знаю
         for embedding in _faces:
             if isinstance(embedding, IFace):
                 logger.debug("Добавление Face в список")
@@ -64,3 +69,20 @@ class User(IUser):
                 raise ValueError(
                     f"Элементы должны быть либо списками чисел, либо объектами Embedding. На вход было получено {type(embedding)}"
                 )
+    
+    @property
+    def username(self) -> str | None:
+        return self.__username
+    
+    @username.setter
+    def username(self, value: str):
+        if not value:
+            raise ValueError(
+                    f"Имя пользователя не может быть пустым. На вход было получено {type(value)}"
+            )
+        for char in value:
+            if char not in (string.ascii_letters + string.digits):
+                raise ValueError(
+                    f"Имя пользователя может содержать только цифры и латиницу. На вход было получено {type(value)}"
+            )
+        self.__username = value

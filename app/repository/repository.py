@@ -5,7 +5,7 @@ import uuid
 from loguru import logger
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import delete, select, or_
-from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError, DBAPIError
 from sqlalchemy.orm import selectinload
 
 
@@ -50,16 +50,17 @@ class IRepository(Generic[T], ABC):
             logger.debug("Производится commit")
             await self.session.commit()
         except IntegrityError as error:
-            logger.error(error)
+            error_type = type(error)
+            logger.error(f" {error_type} | {error}")
             raise UsernameError("Username уже занят")
         except SQLAlchemyError as error:
             error_type = type(error)
-            logger.error(f" {error_type} | asdasdcasdcascdascdascd {error}")
+            logger.error(f" {error_type} | {error}")
             await self.session.rollback()
             raise DataBaseError()
         except Exception as error:
-            logger.error(error)
-            logger.error("ЕБАКА БЛЯТЬ!")
+            error_type = type(error)
+            logger.error(f" {error_type} | {error}")
             await self.session.rollback()
 
 
@@ -110,9 +111,12 @@ class UserRepository(IRepository):
             .offset(offset)
             .limit(limit)
         )
-        users = await self.session.execute(sql)
-        users = users.scalars().all()
-        return [User(**user.dict()) for user in users]
+        try:
+            users = await self.session.execute(sql)
+            users = users.scalars().all()
+            return [User(**user.dict()) for user in users]
+        except DBAPIError:
+            return []
 
     async def update(self, entity: IUser) -> None:
         try:

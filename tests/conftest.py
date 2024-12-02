@@ -106,5 +106,15 @@ async def client(
     :param fastapi_app: the application.
     :yield: client for the app.
     """
-    async with AsyncClient(app=fastapi_app, base_url="http://127.0.0.1:8000", timeout=2.0) as ac:
+    async with AsyncClient(app=fastapi_app, base_url=settings.base_url, timeout=2.0) as ac:
         yield ac
+
+@pytest.fixture()
+async def auth_token(client: AsyncClient, fastapi_app: FastAPI):
+    """
+    Fixture for receiving a token.
+    """
+    url = fastapi_app.url_path_for("authentication")
+    response = await client.post(url, json={"username": "test", "password": "test"})
+    response.raise_for_status()
+    return response.json()["access_token"]

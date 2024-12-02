@@ -1,0 +1,647 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "app",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/api/monitoring/health": {
+      "get": {
+        "summary": "Health Check",
+        "description": "Checks the health of a project.\n\nIt returns 200 if the project is healthy.",
+        "operationId": "health_check_api_monitoring_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/create": {
+      "post": {
+        "summary": "Register",
+        "description": "Cоздание пользователя",
+        "operationId": "register_api_auth_create_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "summary": "Authentication",
+        "description": "Авторизация пользователя",
+        "operationId": "authentication_api_auth_login_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthUser"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/face": {
+      "post": {
+        "summary": "Face Embeddings Authentication",
+        "description": "Аунтификация пользователя по Face",
+        "operationId": "face_embeddings_authentication_api_auth_face_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthFaceUser"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FaceUser"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/": {
+      "get": {
+        "summary": "List Users",
+        "description": "Получение списка с дынными о пользователях",
+        "operationId": "list_users_api_users__get",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "title": "Offset"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Users"
+                  },
+                  "title": "Response List Users Api Users  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/{id_}": {
+      "get": {
+        "summary": "User Info",
+        "description": "Получение дынных о пользователе",
+        "operationId": "user_info_api_users__id___get",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id_",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id "
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Update",
+        "description": "Изменение данных о пользователе",
+        "operationId": "update_api_users__id___put",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id_",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id "
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUser"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ai/": {
+      "post": {
+        "summary": "Image To Embedding",
+        "operationId": "image_to_embedding_api_ai__post",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_image_to_embedding_api_ai__post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FaceEmbedding"
+                  },
+                  "type": "array",
+                  "title": "Response Image To Embedding Api Ai  Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AuthFaceUser": {
+        "properties": {
+          "embedding": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Embedding"
+          }
+        },
+        "type": "object",
+        "required": [
+          "embedding"
+        ],
+        "title": "AuthFaceUser"
+      },
+      "AuthUser": {
+        "properties": {
+          "username": {
+            "type": "string",
+            "title": "Username"
+          },
+          "password": {
+            "type": "string",
+            "title": "Password"
+          }
+        },
+        "type": "object",
+        "required": [
+          "username",
+          "password"
+        ],
+        "title": "AuthUser"
+      },
+      "Body_image_to_embedding_api_ai__post": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "format": "binary",
+            "title": "File"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "title": "Body_image_to_embedding_api_ai__post"
+      },
+      "FaceEmbedding": {
+        "properties": {
+          "embedding": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Embedding"
+          }
+        },
+        "type": "object",
+        "required": [
+          "embedding"
+        ],
+        "title": "FaceEmbedding"
+      },
+      "FaceUser": {
+        "properties": {
+          "id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "username": {
+            "type": "string",
+            "title": "Username"
+          },
+          "faces": {
+            "items": {
+              "$ref": "#/components/schemas/SimilarityEmbedding"
+            },
+            "type": "array",
+            "title": "Faces"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "username",
+          "faces"
+        ],
+        "title": "FaceUser"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "SimilarityEmbedding": {
+        "properties": {
+          "similarity": {
+            "type": "number",
+            "title": "Similarity"
+          }
+        },
+        "type": "object",
+        "required": [
+          "similarity"
+        ],
+        "title": "SimilarityEmbedding"
+      },
+      "TokenResponse": {
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "title": "Access Token"
+          },
+          "token_type": {
+            "type": "string",
+            "title": "Token Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "access_token",
+          "token_type"
+        ],
+        "title": "TokenResponse"
+      },
+      "UpdateUser": {
+        "properties": {
+          "username": {
+            "type": "string",
+            "title": "Username"
+          },
+          "embeddings": {
+            "items": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "type": "array",
+            "title": "Embeddings"
+          }
+        },
+        "type": "object",
+        "required": [
+          "username",
+          "embeddings"
+        ],
+        "title": "UpdateUser"
+      },
+      "User": {
+        "properties": {
+          "id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "username": {
+            "type": "string",
+            "title": "Username"
+          },
+          "is_superuser": {
+            "type": "boolean",
+            "title": "Is Superuser"
+          },
+          "faces": {
+            "items": {
+              "$ref": "#/components/schemas/FaceEmbedding"
+            },
+            "type": "array",
+            "title": "Faces"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "username",
+          "is_superuser",
+          "faces"
+        ],
+        "title": "User"
+      },
+      "UserCreate": {
+        "properties": {
+          "username": {
+            "type": "string",
+            "title": "Username"
+          },
+          "password": {
+            "type": "string",
+            "title": "Password"
+          },
+          "embeddings": {
+            "items": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "type": "array",
+            "title": "Embeddings"
+          }
+        },
+        "type": "object",
+        "required": [
+          "username",
+          "password",
+          "embeddings"
+        ],
+        "title": "UserCreate"
+      },
+      "Users": {
+        "properties": {
+          "id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "username": {
+            "type": "string",
+            "title": "Username"
+          },
+          "is_superuser": {
+            "type": "boolean",
+            "title": "Is Superuser"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "username",
+          "is_superuser"
+        ],
+        "title": "Users"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    },
+    "securitySchemes": {
+      "APIKeyHeader": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization"
+      }
+    }
+  }
+}

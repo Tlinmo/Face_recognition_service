@@ -1,5 +1,6 @@
 from importlib import metadata
 from pathlib import Path
+import json
 
 from fastapi import FastAPI
 from fastapi.responses import UJSONResponse
@@ -91,15 +92,25 @@ def get_app() -> FastAPI:
     """
     configure_logging()
     app = FastAPI(
-        title="app",
-        version=metadata.version("app"),
         lifespan=lifespan_setup,
         docs_url=None,
         redoc_url=None,
         openapi_url="/api/openapi.json",
         default_response_class=UJSONResponse,
     )
-
+    
+    def get_schema():
+        with open(APP_ROOT / "web/openapi.json", 'r') as f:
+            oas = json.load(f)
+            
+            oas["openapi"] = "3.0.0"
+            oas["info"]["title"] = "app"
+            oas["info"]["version"] = metadata.version("app")
+            return oas
+    
+    logger.debug(type(get_schema()))
+    app.openapi_schema = get_schema()
+    
     # Main router for the API.
     app.include_router(router=api_router, prefix="/api")
 

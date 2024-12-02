@@ -106,5 +106,5 @@ async def client(
     :param fastapi_app: the application.
     :yield: client for the app.
     """
-    async with AsyncClient(app=fastapi_app, base_url="http://test", timeout=2.0) as ac:
+    async with AsyncClient(app=fastapi_app, base_url="http://127.0.0.1:8000", timeout=2.0) as ac:
         yield ac

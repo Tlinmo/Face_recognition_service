@@ -48,7 +48,7 @@ async def list_users(
         raise HTTPException(
             status_code=400, detail="offset и limit должны быть положительны"
         )
-    
+
     try:
         repo = UserRepository(session=session)
         user_service = UserService(user_repository=repo)

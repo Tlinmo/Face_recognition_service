@@ -77,9 +77,7 @@ async def authentication(
         user = User(
             username=_user.username,
         )
-        token = await auth.authentication(
-            user=user, password=_user.password
-        )
+        token = await auth.authentication(user=user, password=_user.password)
         return {
             "access_token": token,
             "token_type": "Bearer",

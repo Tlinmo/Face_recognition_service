@@ -8,6 +8,8 @@ async def create_database() -> None:
 
 
 async def drop_database() -> None:
-   """Drop current database."""
+    """Drop current database."""
+
+
 #    if settings.db_file.exists():
 #        Path(settings.db_file).unlink()

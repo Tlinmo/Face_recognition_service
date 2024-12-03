@@ -56,10 +56,10 @@ async def register(
         raise HTTPException(
             status_code=400, detail="Вы использовали неверный размер вектора"
         )
-    except ValueError:
+    except ValueError as error:
         # Нужно будет улучшить валидацию здесь
         raise HTTPException(
-            status_code=400, detail="Вы использовали некоректные данные при регистрации"
+            status_code=400, detail=str(error)
         )
 
 

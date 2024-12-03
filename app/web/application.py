@@ -114,7 +114,6 @@ def get_app() -> FastAPI:
             oas["info"]["version"] = metadata.version("app")
             return oas
 
-    logger.debug(type(get_schema()))
     app.openapi_schema = get_schema()
 
     # Main router for the API.

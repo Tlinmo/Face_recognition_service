@@ -190,9 +190,11 @@ class FaceRepository(IRepository):
                 .order_by(db_Face.embedding.l2_distance(embedding))
                 .limit(1)
             )
-            face = await self.session.execute(sql)
-            face = face.scalars().one_or_none()
-
+            try:
+                face = await self.session.execute(sql)
+                face = face.scalars().one_or_none()
+            except DBAPIError:
+                return
         if face:
             return Face(**face.dict())
 

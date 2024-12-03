@@ -5,7 +5,7 @@ from app.settings import settings as stgs
 
 schema = schemathesis.from_uri(f"{stgs.base_url}/api/openapi.json")
 
-@settings(suppress_health_check=[HealthCheck.function_scoped_fixture])
+@settings(suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.large_base_example])
 @schema.parametrize()
 async def test_api(case, auth_token):
     case.headers = case.headers or {}

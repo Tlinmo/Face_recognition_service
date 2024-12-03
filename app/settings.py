@@ -76,9 +76,9 @@ class Settings(BaseSettings):
         :return: base URL.
         """
         return (
-            f"http://{self.host}:{self.port}"
-            if self.environment == "dev"
-            else f"https://{self.iss}"
+            f"https://{self.iss}"
+            if self.environment == "prod"
+            else f"http://{self.host}:{self.port}"
         )
 
     model_config = SettingsConfigDict(

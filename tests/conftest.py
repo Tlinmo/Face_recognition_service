@@ -106,7 +106,7 @@ async def client(
     :param fastapi_app: the application.
     :yield: client for the app.
     """
-    async with AsyncClient(app=fastapi_app, base_url=f"http://{settings.host}:{settings.port}", timeout=2.0) as ac:
+    async with AsyncClient(app=fastapi_app, base_url=settings.base_url, timeout=2.0) as ac:
         yield ac
 
 @pytest.fixture()

@@ -34,8 +34,6 @@ class AuthorizeRequestMiddleware(BaseHTTPMiddleware):
             request.state.user_id = "73e509f9-d46e-46b9-8002-75e44d5be09e"  # Теперь он моя лабораторная крыса
             return await call_next(request)
 
-        logger.debug(request.url.path)
-
         # Разрешаем ендпоинты, которые будет доступны без авторизации
         open_endpoints = [
             "/api/docs",
@@ -53,6 +51,8 @@ class AuthorizeRequestMiddleware(BaseHTTPMiddleware):
 
         bearer_token = request.headers.get("Authorization")
         if not bearer_token:
+            logger.debug(f"Нет токена {bearer_token}")
+            
             return JSONResponse(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 content={
@@ -60,7 +60,13 @@ class AuthorizeRequestMiddleware(BaseHTTPMiddleware):
                 },
             )
         try:
-            auth_token = bearer_token.split()[1].strip()
+            bearer_token = bearer_token.split()
+            if len(bearer_token) != 2:
+                raise jwt.InvalidTokenError
+            if bearer_token[0].lower() != 'bearer':
+                raise jwt.InvalidTokenError
+            
+            auth_token = bearer_token[1].strip()
             token_payload = decode_and_validate_token(auth_token)
             request.state.user_id = token_payload["sub"]
         except jwt.ExpiredSignatureError:
@@ -71,7 +77,7 @@ class AuthorizeRequestMiddleware(BaseHTTPMiddleware):
         except jwt.InvalidTokenError as e:
             return JSONResponse(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                content={"detail": str(e)},
+                content={"detail": "Invalid token"},
             )
         except Exception as error:
             return JSONResponse(

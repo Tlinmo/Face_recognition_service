@@ -131,19 +131,17 @@ class UserRepository(IRepository):
             if _user is None:
                 raise UpdateError("User не найден")
 
-            if entity.username:
-                logger.debug(
-                    f"Изменяем имя пользователя {_user.username} на {entity.username}"
-                )
-                _user.username = entity.username
+            logger.debug(
+                f"Изменяем имя пользователя {_user.username} на {entity.username}"
+            )
+            _user.username = entity.username
 
-            if entity.faces:
-                logger.debug(f"Изменяем faces пользователя")
+            logger.debug(f"Изменяем faces пользователя")
 
-                await self.session.execute(
-                    delete(db_Face).where(db_Face.user_id == entity.id)
-                )
-                _user.set_embeddings([f.embedding for f in entity.faces])
+            await self.session.execute(
+                delete(db_Face).where(db_Face.user_id == entity.id)
+            )
+            _user.set_embeddings([f.embedding for f in entity.faces])
         except IntegrityError as error:
             raise UsernameError("Username уже занят")
 

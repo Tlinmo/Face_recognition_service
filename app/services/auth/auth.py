@@ -88,14 +88,13 @@ class AuthService:
         if not user:
             raise AuthFaceError
 
-        if settings.environment == "dev":
-            logger.debug(f"Узнается схожесть с embeddings пользователя")
-            for user_face in user.faces:
-                similarity = np.linalg.norm(
-                    np.array(user_face.embedding) - np.array(face.embedding)
-                )
-                user_face.similarity = similarity
+        logger.debug(f"Узнается схожесть с embeddings пользователя")
+        for user_face in user.faces:
+            similarity = np.linalg.norm(
+                np.array(user_face.embedding) - np.array(face.embedding)
+            )
+            user_face.similarity = similarity
 
-                logger.debug(f"Схожесть пользователя: {similarity}")
+            logger.debug(f"Схожесть пользователя: {similarity}")
 
         return user

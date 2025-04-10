@@ -27,10 +27,6 @@ auth_header = APIKeyHeader(name="Authorization", auto_error=False)
 
 router = APIRouter()
 
-#  Тут везде кастыль который нужен для того что бы из swagger ui можно было делать авторизованные запросы.
-# Возможно если вручную прописать спецификацию, добавив туда зависимость заголовка Authorization,
-# то возможно swagger ui поймет что нужно добавлять заголовок, и + добавит возможность его добавить через свой ui
-
 
 @router.get("/", response_model=List[schema.Users], status_code=200)
 async def list_users(
@@ -38,7 +34,6 @@ async def list_users(
     offset: int = 0,
     limit: int = 10,
     session: AsyncSession = Depends(get_db_session),
-    token: str = Depends(auth_header), # Теперь это поле не нужно, но трогать пока не буду
 ) -> List[IUser]:
     """Получение списка с дынными о пользователях"""
     logger.debug("Получаем список пользователей")
@@ -51,7 +46,7 @@ async def list_users(
 
     try:
         repo = UserRepository(session=session)
-        user_service = UserService(user_repository=repo)
+        user_service = UserService(user_repository=repo, user_id=request.state.user_id)
 
         users = await user_service.lst(offset=offset, limit=limit)
 
@@ -62,6 +57,7 @@ async def list_users(
 
 @router.get("/{id_:str}", response_model=schema.User, status_code=200)
 async def user_info(
+    request: Request,
     id_: UUID,
     session: AsyncSession = Depends(get_db_session),
     token: str = Depends(auth_header),
@@ -71,7 +67,7 @@ async def user_info(
 
     try:
         repo = UserRepository(session=session)
-        user_service = UserService(user_repository=repo)
+        user_service = UserService(user_repository=repo, user_id=request.state.user_id)
 
         user = await user_service.show(id_=id_)
         if user:
@@ -83,22 +79,22 @@ async def user_info(
 
 @router.put("/{id_:str}", status_code=204)
 async def update(
+    request: Request,
     id_: UUID,
     _user: schema.UpdateUser,
     session: AsyncSession = Depends(get_db_session),
-    token: str = Depends(auth_header),
 ):
     """Изменение данных о пользователе"""
     logger.debug(f"Обновляем данные пользователя c id {id_}")
 
     try:
         repo = UserRepository(session=session)
-        user_service = UserService(user_repository=repo)
+        user_service = UserService(user_repository=repo, user_id=request.state.user_id)
         user = User(id=id_, username=_user.username, first_name=_user.first_name, second_name=_user.second_name, faces=_user.embeddings)
 
         await user_service.update(user)
-    except UserUpdateError:
-        raise HTTPException(status_code=404, detail="Не найдено")
+    except UserUpdateError as error:
+        raise HTTPException(status_code=403, detail=str(error))
     except ServiceUsernameError:
         raise HTTPException(status_code=401, detail="Такой логин уже есть")
     except ServiceDataBaseError:

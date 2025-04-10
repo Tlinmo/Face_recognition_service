@@ -1,6 +1,7 @@
 from importlib import metadata
 from pathlib import Path
 import json
+from uuid import UUID
 
 from fastapi import FastAPI
 from fastapi.responses import UJSONResponse
@@ -68,7 +69,7 @@ class AuthorizeRequestMiddleware(BaseHTTPMiddleware):
             
             auth_token = bearer_token[1].strip()
             token_payload = decode_and_validate_token(auth_token)
-            request.state.user_id = token_payload["sub"]
+            request.state.user_id = UUID(token_payload["sub"])
         except jwt.ExpiredSignatureError:
             return JSONResponse(
                 status_code=status.HTTP_401_UNAUTHORIZED,

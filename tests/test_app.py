@@ -96,7 +96,7 @@ async def test_upload_real_image_and_create_user(client: AsyncClient, fastapi_ap
     user_embedding = response.json()[0]["embedding"]
     url = fastapi_app.url_path_for("register")
 
-    response = await client.post(url, json={"username": "ShimonPeres", "password": "test", "embeddings": [user_embedding]})
+    response = await client.post(url, json={"username": "ShimonPeres", "first_name": "Shimon", "second_name": "Peres", "password": "test", "embeddings": [user_embedding]})
     
     assert response.status_code == status.HTTP_201_CREATED
 
@@ -130,7 +130,7 @@ async def test_upload_real_image_and_create_user_and_search_user(client: AsyncCl
     
     url = fastapi_app.url_path_for("register")
 
-    response = await client.post(url, json={"username": "ShimonPeres", "password": "test", "embeddings": [user_embedding]})
+    response = await client.post(url, json={"username": "ShimonPeres", "first_name": "Shimon", "second_name": "Peres", "password": "test", "embeddings": [user_embedding]})
     
     assert response.status_code == status.HTTP_201_CREATED
     

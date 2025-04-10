@@ -6,6 +6,8 @@ from pydantic import BaseModel
 
 class UpdateUser(BaseModel):
     username: str
+    first_name: str
+    second_name: str
     embeddings: List[List[float]]
 
     class Config:
@@ -19,6 +21,8 @@ class FaceEmbedding(BaseModel):
 class User(BaseModel):
     id: Optional[UUID]
     username: str
+    first_name: str
+    second_name: str
     is_superuser: bool
     faces: List[FaceEmbedding]
 
@@ -29,6 +33,8 @@ class User(BaseModel):
 class Users(BaseModel):
     id: Optional[UUID]
     username: str
+    first_name: str
+    second_name: str
     is_superuser: bool
 
     class Config:

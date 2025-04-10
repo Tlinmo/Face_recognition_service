@@ -39,6 +39,8 @@ async def register(
         auth = AuthService(user_repository=user_repo, face_repository=face_repo)
         user = User(
             username=_user.username,
+            first_name=_user.first_name,
+            second_name=_user.second_name,
             hashed_password=User.hash_password(_user.password),
             faces=_user.embeddings,
         )

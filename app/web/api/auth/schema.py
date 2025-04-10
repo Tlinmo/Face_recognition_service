@@ -6,6 +6,8 @@ from pydantic import BaseModel
 
 class UserCreate(BaseModel):
     username: str
+    first_name: str
+    second_name: str
     password: str
     embeddings: List[List[float]]
 

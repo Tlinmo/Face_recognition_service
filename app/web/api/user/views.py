@@ -38,7 +38,7 @@ async def list_users(
     offset: int = 0,
     limit: int = 10,
     session: AsyncSession = Depends(get_db_session),
-    token: str = Depends(auth_header),
+    token: str = Depends(auth_header), # Теперь это поле не нужно, но трогать пока не буду
 ) -> List[IUser]:
     """Получение списка с дынными о пользователях"""
     logger.debug("Получаем список пользователей")
@@ -94,7 +94,7 @@ async def update(
     try:
         repo = UserRepository(session=session)
         user_service = UserService(user_repository=repo)
-        user = User(id=id_, username=_user.username, faces=_user.embeddings)
+        user = User(id=id_, username=_user.username, first_name=_user.first_name, second_name=_user.second_name, faces=_user.embeddings)
 
         await user_service.update(user)
     except UserUpdateError:

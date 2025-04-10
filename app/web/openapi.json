@@ -750,6 +750,14 @@
             "title": "Username",
             "example": "John"
           },
+          "first_name": {
+            "type": "string",
+            "title": "First name"
+          },
+          "second_name": {
+            "type": "string",
+            "title": "Second name"
+          },
           "embeddings": {
             "items": {
               "items": {
@@ -790,6 +798,14 @@
             "title": "Username",
             "example": "John"
           },
+          "first_name": {
+            "type": "string",
+            "title": "First name"
+          },
+          "second_name": {
+            "type": "string",
+            "title": "Second name"
+          },
           "is_superuser": {
             "type": "boolean",
             "title": "Is Superuser"
@@ -817,6 +833,16 @@
             "type": "string",
             "title": "Username",
             "example": "John"
+          },
+          "first_name": {
+            "type": "string",
+            "title": "First name",
+            "example": "John"
+          },
+          "second_name": {
+            "type": "string",
+            "title": "Second name",
+            "example": "Doe"
           },
           "password": {
             "type": "string",
@@ -862,6 +888,14 @@
           "username": {
             "type": "string",
             "title": "Username"
+          },
+          "first_name": {
+            "type": "string",
+            "title": "First name"
+          },
+          "second_name": {
+            "type": "string",
+            "title": "Second name"
           },
           "is_superuser": {
             "type": "boolean",

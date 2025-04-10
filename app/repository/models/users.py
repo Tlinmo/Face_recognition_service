@@ -22,6 +22,8 @@ class User(Base):
 
     id = Column(UUID, primary_key=True, default=generate_uuid)
     username = Column(String, unique=True, index=True)
+    first_name = Column(String, nullable=True)
+    second_name = Column(String, nullable=True)
     hashed_password = Column(String, index=True)
     is_superuser = Column(Boolean, default=False)
     faces = relationship("Face", back_populates="user")
@@ -30,6 +32,8 @@ class User(Base):
         return {
             "id": self.id,
             "username": self.username,
+            "first_name": self.first_name,
+            "second_name": self.second_name,
             "hashed_password": self.hashed_password,
             "is_superuser": self.is_superuser,
             "faces": [face.embedding for face in self.faces],

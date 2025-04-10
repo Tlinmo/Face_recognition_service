@@ -68,6 +68,8 @@ class UserRepository(IRepository):
     async def add(self, entity: IUser) -> IUser:
         db_user = db_User(
             username=entity.username,
+            first_name=entity.first_name,
+            second_name=entity.second_name,
             hashed_password=entity.hashed_password,
             is_superuser=entity.is_superuser,
         )
@@ -135,6 +137,12 @@ class UserRepository(IRepository):
                 f"Изменяем имя пользователя {_user.username} на {entity.username}"
             )
             _user.username = entity.username
+            
+            logger.debug(
+                f"Изменяем имя и фамилию пользователя {_user.first_name}  {_user.second_name} на {entity.first_name} {entity.second_name}"
+            )
+            _user.first_name = entity.first_name
+            _user.second_name = entity.second_name
 
             logger.debug(f"Изменяем faces пользователя")
 

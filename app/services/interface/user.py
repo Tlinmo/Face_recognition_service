@@ -10,6 +10,8 @@ class IUser(ABC):
     def __init__(
         self,
         username: str,
+        first_name: str,
+        second_name: str,
         hashed_password: str = "",
         id: uuid.UUID | None = None,
         is_superuser: bool = False,
@@ -17,6 +19,8 @@ class IUser(ABC):
     ) -> None:
         self.id = id
         self.username = username
+        self.first_name = first_name
+        self.second_name = second_name
         self.hashed_password = hashed_password
         self.is_superuser = is_superuser
         self.faces = faces

@@ -1,0 +1,20 @@
+services:
+  api:
+    ports:
+      # Exposes application port.
+    - "8000:8000"
+    build:
+      context: .
+    volumes:
+      # Adds current directory as volume.
+    - .:/app/src/
+    environment:
+      # Enables autoreload.
+      APP_RELOAD: "True"
+
+      # database settings
+      APP_DB_HOST: "localhost"
+      APP_DB_PORT: "5432"
+      APP_DB_BASE: "postgres"
+      APP_DB_USER: "postgres"
+      APP_DB_PASS: "password"
